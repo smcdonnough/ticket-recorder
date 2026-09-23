@@ -14,7 +14,7 @@ STREAM="https://playerservices.streamtheworld.com/api/livestream-redirect/KTCKAM
 FFMPEG="${FFMPEG:-ffmpeg}"
 export TZ=America/Chicago
 
-if [[ "${FORCE:-}" != "1" && "$(date +%z)" != "$OFFSET" ]]; then
+if [[ "${FORCE:-}" != "1" && "$OFFSET" != "ANY" && "$(date +%z)" != "$OFFSET" ]]; then
   echo "Central offset today is $(date +%z); this run is for $OFFSET. Skipping."
   exit 0
 fi
@@ -22,6 +22,10 @@ fi
 DAY="$(date +%F)"
 END_EPOCH="$(date -d "$DAY $END_CT" +%s)"
 [[ -n "${MAX_SECONDS:-}" ]] && END_EPOCH=$(( $(date +%s) + MAX_SECONDS ))
+if (( $(date +%s) > END_EPOCH - 300 )); then
+  # A backup trigger that fired after the show (another run already recorded it).
+  echo "It's $(date +%H:%M) CT, past $END_CT. Nothing to record."; exit 0
+fi
 WORK="$(mktemp -d)"
 echo "Recording $SHOW until $(date -d @"$END_EPOCH" +%H:%M) CT"
 

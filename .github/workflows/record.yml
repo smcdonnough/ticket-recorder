@@ -2,13 +2,29 @@ name: Record The Ticket
 
 on:
   schedule:
-    # Times are UTC. Each show is listed for daylight and standard time;
-    # record.sh skips whichever one doesn't apply today.
-    - cron: '0 10 * * 1-5'   # Musers, 5:00 AM CDT
-    - cron: '0 11 * * 1-5'   # Musers, 5:00 AM CST
-    - cron: '30 19 * * 1-5'  # Hardline, 2:30 PM CDT
-    - cron: '30 20 * * 1-5'  # Hardline, 2:30 PM CST
-  workflow_dispatch: {}      # manual run = 10-minute test recording
+    # Times are UTC. GitHub often starts scheduled runs late or drops them,
+    # especially on the hour, so each show has several backup triggers. The
+    # first to fire records; later ones wait (concurrency below) and then
+    # find the show over and exit. record.sh also skips triggers meant for
+    # the other daylight/standard-time offset.
+    - cron: '47 9 * * 1-5'   # Musers CDT (4:47 AM)
+    - cron: '7,22,37 10 * * 1-5'  # Musers CDT backups / CST first
+    - cron: '7,22,37 11 * * 1-5'  # Musers CST backups
+    - cron: '17 19 * * 1-5'  # Hardline CDT (2:17 PM)
+    - cron: '32,47 19 * * 1-5'    # Hardline CDT backups
+    - cron: '2,17,32,47 20 * * 1-5'  # Hardline CDT late backups / CST
+    - cron: '2,17 21 * * 1-5'     # Hardline CST backups
+  workflow_dispatch:
+    inputs:
+      show:
+        description: Test = 10-minute sample; Musers/Hardline = record now until the show ends
+        type: choice
+        options: [Test, Musers, Hardline]
+        default: Test
+
+concurrency:
+  group: record-${{ github.event.schedule && (startsWith(github.event.schedule, '47 9') || contains(github.event.schedule, ' 10 ') || contains(github.event.schedule, ' 11 ')) && 'Musers' || github.event.schedule && 'Hardline' || inputs.show }}
+  cancel-in-progress: false
 
 permissions:
   contents: read
@@ -31,14 +47,24 @@ jobs:
         env:
           DRIVE_UPLOAD_URL: ${{ secrets.DRIVE_UPLOAD_URL }}
           SCHEDULE: ${{ github.event.schedule }}
+          SHOW_INPUT: ${{ inputs.show }}
           OUT_DIR: ${{ runner.temp }}/out
         run: |
+          # Which show this trigger is for; the UTC offset check in record.sh
+          # drops triggers that belong to the other side of the DST change.
           case "$SCHEDULE" in
-            '0 10 * * 1-5')  bash record.sh Musers   -0500 09:05 ;;
-            '0 11 * * 1-5')  bash record.sh Musers   -0600 09:05 ;;
-            '30 19 * * 1-5') bash record.sh Hardline -0500 19:05 ;;
-            '30 20 * * 1-5') bash record.sh Hardline -0600 19:05 ;;
-            *)               FORCE=1 MAX_SECONDS=600 bash record.sh Test -0000 00:00 ;;
+            '47 9 * * 1-5')                         set -- Musers -0500 ;;
+            '7,22,37 10 * * 1-5')                   set -- Musers ANY ;;
+            '7,22,37 11 * * 1-5')                   set -- Musers -0600 ;;
+            '17 19 * * 1-5'|'32,47 19 * * 1-5')     set -- Hardline -0500 ;;
+            '2,17,32,47 20 * * 1-5')                set -- Hardline ANY ;;
+            '2,17 21 * * 1-5')                      set -- Hardline -0600 ;;
+            '') set -- "${SHOW_INPUT:-Test}" ANY; export FORCE=1 ;;
+          esac
+          case "$1" in
+            Musers)   bash record.sh Musers   "$2" 09:05 ;;
+            Hardline) bash record.sh Hardline "$2" 19:05 ;;
+            *)        MAX_SECONDS=600 bash record.sh Test ANY 00:00 ;;
           esac
       # The repo is public, so the hand-off copy is encrypted and kept for one day.
       - name: Encrypt recording for the next job
