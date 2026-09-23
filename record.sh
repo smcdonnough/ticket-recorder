@@ -47,6 +47,12 @@ OUT="$WORK/$DAY $SHOW.m4a"
 SIZE=$(stat -c %s "$OUT")
 echo "Recorded $(( SIZE / 1048576 )) MB"
 
+# Hand the file to the transcribe/ad-removal job.
+if [[ -n "${OUT_DIR:-}" ]]; then
+  mkdir -p "$OUT_DIR" && cp "$OUT" "$OUT_DIR/"
+  { echo "recorded=true"; echo "show=$SHOW"; echo "day=$DAY"; } >> "${GITHUB_OUTPUT:-/dev/null}"
+fi
+
 if [[ -z "${DRIVE_UPLOAD_URL:-}" ]]; then
   echo "DRIVE_UPLOAD_URL not set; leaving file at $OUT"; exit 0
 fi
@@ -55,8 +61,8 @@ fi
 NAME="$(basename "$OUT")"
 # Apps Script answers with a redirect that only resolves with its cookie kept.
 SESSION=""
-for attempt in 1 2 3; do
-  SESSION=$(curl -sS --connect-timeout 30 -m 120 -L -c "$WORK/jar" -b "$WORK/jar" -G "$DRIVE_UPLOAD_URL" \
+for attempt in 1 2 3 4 5; do
+  SESSION=$(curl -sS --connect-timeout 30 -m 60 -L -c "$WORK/jar" -b "$WORK/jar" -G "$DRIVE_UPLOAD_URL" \
     --data-urlencode "name=$NAME" --data-urlencode "size=$SIZE" || true)
   case "$SESSION" in https://*) break;; esac
   sleep 20

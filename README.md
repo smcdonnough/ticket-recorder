@@ -9,7 +9,8 @@ folder in Google Drive. Recordings older than 30 days are deleted.
 - `drive-upload.gs` — Google Apps Script web app that hands out Drive upload links.
   Its deployed URL, with `?key=<key>` appended, goes in the `DRIVE_UPLOAD_URL` repo secret.
 
-Run the workflow manually ("Run workflow") for a 2-minute test recording.
+Run the workflow manually ("Run workflow") for a 10-minute test recording, transcript and ad cut.
+`process.py` does the transcription (faster-whisper) and ad removal (Claude).
 
 ## Planned: ad removal
 

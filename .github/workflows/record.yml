@@ -8,7 +8,7 @@ on:
     - cron: '0 11 * * 1-5'   # Musers, 5:00 AM CST
     - cron: '30 19 * * 1-5'  # Hardline, 2:30 PM CDT
     - cron: '30 20 * * 1-5'  # Hardline, 2:30 PM CST
-  workflow_dispatch: {}      # manual run = 2-minute test recording
+  workflow_dispatch: {}      # manual run = 10-minute test recording
 
 permissions:
   contents: read
@@ -18,22 +18,42 @@ jobs:
   record:
     runs-on: ubuntu-latest
     timeout-minutes: 350
+    outputs:
+      recorded: ${{ steps.rec.outputs.recorded }}
+      show: ${{ steps.rec.outputs.show }}
+      day: ${{ steps.rec.outputs.day }}
     steps:
       - uses: actions/checkout@v4
       - name: Install ffmpeg
         run: sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg
       - name: Record and upload
+        id: rec
         env:
           DRIVE_UPLOAD_URL: ${{ secrets.DRIVE_UPLOAD_URL }}
           SCHEDULE: ${{ github.event.schedule }}
+          OUT_DIR: ${{ runner.temp }}/out
         run: |
           case "$SCHEDULE" in
             '0 10 * * 1-5')  bash record.sh Musers   -0500 09:05 ;;
             '0 11 * * 1-5')  bash record.sh Musers   -0600 09:05 ;;
             '30 19 * * 1-5') bash record.sh Hardline -0500 19:05 ;;
             '30 20 * * 1-5') bash record.sh Hardline -0600 19:05 ;;
-            *)               FORCE=1 MAX_SECONDS=120 bash record.sh Test -0000 00:00 ;;
+            *)               FORCE=1 MAX_SECONDS=600 bash record.sh Test -0000 00:00 ;;
           esac
+      # The repo is public, so the hand-off copy is encrypted and kept for one day.
+      - name: Encrypt recording for the next job
+        if: steps.rec.outputs.recorded == 'true'
+        env:
+          PASS: ${{ secrets.DRIVE_UPLOAD_URL }}
+        run: |
+          cd "${{ runner.temp }}/out"
+          openssl enc -aes-256-cbc -pbkdf2 -pass env:PASS -in *.m4a -out audio.enc
+      - uses: actions/upload-artifact@v4
+        if: steps.rec.outputs.recorded == 'true'
+        with:
+          name: audio
+          path: ${{ runner.temp }}/out/audio.enc
+          retention-days: 1
       # GitHub pauses schedules in repos with no activity for 60 days;
       # re-enabling on every run keeps this one going.
       - name: Keep schedule alive
@@ -41,3 +61,28 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: gh api -X PUT "repos/$GITHUB_REPOSITORY/actions/workflows/record.yml/enable"
+
+  remove-ads:
+    needs: record
+    if: needs.record.outputs.recorded == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 300
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: audio
+      - name: Install tools
+        run: |
+          sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg
+          pip install -q faster-whisper anthropic requests pydantic
+      - name: Transcribe, find ads, cut, upload
+        env:
+          PASS: ${{ secrets.DRIVE_UPLOAD_URL }}
+          DRIVE_UPLOAD_URL: ${{ secrets.DRIVE_UPLOAD_URL }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          SHOW: ${{ needs.record.outputs.show }}
+          DAY: ${{ needs.record.outputs.day }}
+        run: |
+          openssl enc -d -aes-256-cbc -pbkdf2 -pass env:PASS -in audio.enc -out audio.m4a
+          python process.py audio.m4a "$SHOW" "$DAY"
