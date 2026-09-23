@@ -63,8 +63,8 @@ jobs:
             *)  echo "Trigger '$SCHEDULE' is no longer in the schedule. Skipping."; exit 0 ;;
           esac
           case "$1" in
-            Musers)   bash record.sh Musers   "$2" 09:05 ;;
-            Hardline) bash record.sh Hardline "$2" 19:05 ;;
+            Musers)   AIR_START=06:00 AIR_END=09:00 bash record.sh Musers   "$2" 09:05 ;;
+            Hardline) AIR_START=15:00 AIR_END=19:00 bash record.sh Hardline "$2" 19:05 ;;
             *)        MAX_SECONDS=600 bash record.sh Test ANY 00:00 ;;
           esac
       # The repo is public, so the hand-off copy is encrypted and kept for one day.
