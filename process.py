@@ -212,7 +212,8 @@ def main():
 
     cut_list = f"{base} cut list.txt"
     with open(cut_list, "w") as f:
-        f.write(f"{base}: removed {hms(removed)} of {hms(duration)} in {len(ranges)} cuts\n\n")
+        f.write(f"{base}: removed {hms(removed)} of {hms(duration)} in {len(ranges)} breaks"
+                    f" ({len(removals)} items below)\n\n")
         for r in sorted(removals, key=lambda r: r.first_line):
             a = min(r.first_line, len(segs) - 1)
             b = min(r.last_line, len(segs) - 1)
