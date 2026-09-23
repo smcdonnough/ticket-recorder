@@ -60,6 +60,7 @@ jobs:
             '2,17,32,47 20 * * 1-5')                set -- Hardline ANY ;;
             '2,17 21 * * 1-5')                      set -- Hardline -0600 ;;
             '') set -- "${SHOW_INPUT:-Test}" ANY; export FORCE=1 ;;
+            *)  echo "Trigger '$SCHEDULE' is no longer in the schedule. Skipping."; exit 0 ;;
           esac
           case "$1" in
             Musers)   bash record.sh Musers   "$2" 09:05 ;;
