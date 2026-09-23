@@ -65,6 +65,17 @@ def hms(t):
     return f"{t // 3600}:{t // 60 % 60:02d}:{t % 60:02d}"
 
 
+def clock(t):
+    """Approximate Central time for a point in the file, when the recorder reported it.
+    Kept in the cut list so break timing can be compared across days."""
+    zero = int(os.environ.get("CLOCK0") or 0)
+    if not zero:
+        return ""
+    os.environ["TZ"] = "America/Chicago"
+    time.tzset()
+    return time.strftime("  (~%-I:%M %p)", time.localtime(zero + t))
+
+
 def transcribe(path):
     """Short lines (split at sentence ends and pauses) so a cut can land between
     a host's tease and the ad copy that follows it, instead of taking both."""
@@ -205,7 +216,7 @@ def main():
         for r in sorted(removals, key=lambda r: r.first_line):
             a = min(r.first_line, len(segs) - 1)
             b = min(r.last_line, len(segs) - 1)
-            f.write(f"{hms(segs[a][0])}-{hms(segs[b][1])}  {r.kind:20s} {r.note}\n")
+            f.write(f"{hms(segs[a][0])}-{hms(segs[b][1])}{clock(segs[a][0])}  {r.kind:20s} {r.note}\n")
     upload(clean, "audio/mp4")
     upload(cut_list, "text/plain")
 

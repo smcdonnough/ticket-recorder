@@ -38,6 +38,7 @@ jobs:
       recorded: ${{ steps.rec.outputs.recorded }}
       show: ${{ steps.rec.outputs.show }}
       day: ${{ steps.rec.outputs.day }}
+      clock0: ${{ steps.rec.outputs.clock0 }}
     steps:
       - uses: actions/checkout@v4
       - name: Install ffmpeg
@@ -110,6 +111,7 @@ jobs:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
           SHOW: ${{ needs.record.outputs.show }}
           DAY: ${{ needs.record.outputs.day }}
+          CLOCK0: ${{ needs.record.outputs.clock0 }}
         run: |
           openssl enc -d -aes-256-cbc -pbkdf2 -pass env:PASS -in audio.enc -out audio.m4a
           python process.py audio.m4a "$SHOW" "$DAY"

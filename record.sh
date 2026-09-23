@@ -54,9 +54,10 @@ cat "$WORK"/part*.aac > "$WORK/all.aac"
 # wall clock: the front crop errs early, and the back crop is skipped when the
 # stream reconnected mid-show (each reconnect adds more lag).
 CROP=()
+CLOCK0=$REC_START  # wall-clock time of the saved file's first second (approx.)
 if [[ -n "${AIR_START:-}" ]]; then
   front=$(( $(date -d "$DAY $AIR_START" +%s) - 120 - REC_START ))
-  (( front > 0 )) && CROP+=(-ss "$front")
+  if (( front > 0 )); then CROP+=(-ss "$front"); CLOCK0=$(( REC_START + front )); fi
   if [[ -n "${AIR_END:-}" && $n -eq 1 ]]; then
     back=$(( $(date -d "$DAY $AIR_END" +%s) + 120 - REC_START ))
     CROP+=(-to "$back")
@@ -71,7 +72,7 @@ echo "Recorded $(( SIZE / 1048576 )) MB"
 # Hand the file to the transcribe/ad-removal job.
 if [[ -n "${OUT_DIR:-}" ]]; then
   mkdir -p "$OUT_DIR" && cp "$OUT" "$OUT_DIR/"
-  { echo "recorded=true"; echo "show=$SHOW"; echo "day=$DAY"; } \
+  { echo "recorded=true"; echo "show=$SHOW"; echo "day=$DAY"; echo "clock0=$CLOCK0"; } \
     >> "${GITHUB_OUTPUT:-/dev/null}"
 fi
 
