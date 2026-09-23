@@ -1,0 +1,43 @@
+name: Record The Ticket
+
+on:
+  schedule:
+    # Times are UTC. Each show is listed for daylight and standard time;
+    # record.sh skips whichever one doesn't apply today.
+    - cron: '0 10 * * 1-5'   # Musers, 5:00 AM CDT
+    - cron: '0 11 * * 1-5'   # Musers, 5:00 AM CST
+    - cron: '30 19 * * 1-5'  # Hardline, 2:30 PM CDT
+    - cron: '30 20 * * 1-5'  # Hardline, 2:30 PM CST
+  workflow_dispatch: {}      # manual run = 2-minute test recording
+
+permissions:
+  contents: read
+  actions: write
+
+jobs:
+  record:
+    runs-on: ubuntu-latest
+    timeout-minutes: 350
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install ffmpeg
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg
+      - name: Record and upload
+        env:
+          DRIVE_UPLOAD_URL: ${{ secrets.DRIVE_UPLOAD_URL }}
+          SCHEDULE: ${{ github.event.schedule }}
+        run: |
+          case "$SCHEDULE" in
+            '0 10 * * 1-5')  bash record.sh Musers   -0500 09:05 ;;
+            '0 11 * * 1-5')  bash record.sh Musers   -0600 09:05 ;;
+            '30 19 * * 1-5') bash record.sh Hardline -0500 19:05 ;;
+            '30 20 * * 1-5') bash record.sh Hardline -0600 19:05 ;;
+            *)               FORCE=1 MAX_SECONDS=120 bash record.sh Test -0000 00:00 ;;
+          esac
+      # GitHub pauses schedules in repos with no activity for 60 days;
+      # re-enabling on every run keeps this one going.
+      - name: Keep schedule alive
+        if: always()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh api -X PUT "repos/$GITHUB_REPOSITORY/actions/workflows/record.yml/enable"
