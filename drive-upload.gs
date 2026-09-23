@@ -7,6 +7,10 @@
 const KEY = 'REPLACE_WITH_SECRET_KEY';
 const FOLDER_NAME = 'The Ticket';
 const KEEP_DAYS = 30;
+// GitHub's own scheduler started shows hours late, so Google starts them instead.
+// Paste a GitHub token here (Actions read/write on ticket-recorder only), then run
+// setupSchedule once from the editor.
+const GH_TOKEN = 'PASTE_GITHUB_TOKEN_HERE';
 
 function doGet(e) {
   if (e.parameter.key !== KEY) return reply_('forbidden');
@@ -84,6 +88,32 @@ function buildFeed_() {
   feed.setContent(xml);
   feed.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
   return 'https://drive.usercontent.google.com/download?id=' + feed.getId() + '&export=download&confirm=t';
+}
+
+// Weekday start times, Central. Google runs each within ~15 minutes of the time.
+function setupSchedule() {
+  ScriptApp.getProjectTriggers()
+    .filter(t => /^start(Musers|Hardline)$/.test(t.getHandlerFunction()))
+    .forEach(t => ScriptApp.deleteTrigger(t));
+  ScriptApp.newTrigger('startMusers').timeBased().everyDays(1).atHour(5).nearMinute(15)
+    .inTimezone('America/Chicago').create();
+  ScriptApp.newTrigger('startHardline').timeBased().everyDays(1).atHour(14).nearMinute(15)
+    .inTimezone('America/Chicago').create();
+}
+
+function startMusers() { start_('Musers'); }
+function startHardline() { start_('Hardline'); }
+
+function start_(show) {
+  const day = Number(Utilities.formatDate(new Date(), 'America/Chicago', 'u'));  // 1=Mon..7=Sun
+  if (day > 5) return;
+  UrlFetchApp.fetch(
+    'https://api.github.com/repos/smcdonnough/ticket-recorder/actions/workflows/record.yml/dispatches', {
+      method: 'post',
+      contentType: 'application/json',
+      headers: { Authorization: 'Bearer ' + GH_TOKEN, Accept: 'application/vnd.github+json' },
+      payload: JSON.stringify({ ref: 'main', inputs: { show: show } }),
+    });
 }
 
 // Run once from the editor to grant Drive access before deploying.
