@@ -83,7 +83,7 @@ function buildFeed_() {
   const feed = it.hasNext() ? it.next() : extras.createFile('feed.xml', xml, 'application/rss+xml');
   feed.setContent(xml);
   feed.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
-  return 'https://drive.usercontent.google.com/download?id=' + feed.getId() + '&export=download';
+  return 'https://drive.usercontent.google.com/download?id=' + feed.getId() + '&export=download&confirm=t';
 }
 
 // Run once from the editor to grant Drive access before deploying.
