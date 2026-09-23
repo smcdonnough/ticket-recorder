@@ -10,6 +10,7 @@
 set -euo pipefail
 
 SHOW="$1"; OFFSET="$2"; END_CT="$3"
+EXTRAS="Full recordings & transcripts"  # Drive subfolder; the main folder holds only the no-ads shows
 STREAM="https://playerservices.streamtheworld.com/api/livestream-redirect/KTCKAMAAC.aac"
 FFMPEG="${FFMPEG:-ffmpeg}"
 export TZ=America/Chicago
@@ -64,7 +65,7 @@ if [[ -n "${AIR_START:-}" ]]; then
   fi
   echo "Cropping to air time: ${CROP[*]:-(nothing to crop)}"
 fi
-OUT="$WORK/$DAY $SHOW.m4a"
+OUT="$WORK/$SHOW $DAY ($(date -d "$DAY" +%a)) full with ads.m4a"
 "$FFMPEG" -hide_banner -loglevel error -i "$WORK/all.aac" "${CROP[@]}" -c copy -movflags +faststart "$OUT"
 SIZE=$(stat -c %s "$OUT")
 echo "Recorded $(( SIZE / 1048576 )) MB"
@@ -86,7 +87,8 @@ NAME="$(basename "$OUT")"
 SESSION=""
 for attempt in 1 2 3 4 5; do
   SESSION=$(curl -sS --connect-timeout 30 -m 60 -L -c "$WORK/jar" -b "$WORK/jar" -G "$DRIVE_UPLOAD_URL" \
-    --data-urlencode "name=$NAME" --data-urlencode "size=$SIZE" || true)
+    --data-urlencode "name=$NAME" --data-urlencode "size=$SIZE" \
+    --data-urlencode "sub=$EXTRAS" || true)
   case "$SESSION" in https://*) break;; esac
   sleep 20
 done

@@ -3,9 +3,9 @@
     python process.py <audio.m4a> <show> <YYYY-MM-DD>
 
 Uploads to the Drive folder (via DRIVE_UPLOAD_URL):
-  <date> <show> transcript.txt   - always
-  <date> <show> (no ads).m4a     - when ANTHROPIC_API_KEY is set
-  <date> <show> cut list.txt     - what was removed, with times
+  <show> <date> (<day>).m4a                - the no-ads show, in the main folder
+  <show> <date> (<day>) transcript.txt     - in the "Full recordings & transcripts" subfolder
+  <show> <date> (<day>) cut list.txt       - what was removed, with times (same subfolder)
 """
 import os
 import subprocess
@@ -163,7 +163,10 @@ def render_without(src, dst, ranges, duration):
     return sum(b - a for a, b in keep)
 
 
-def upload(path, content_type):
+EXTRAS = "Full recordings & transcripts"
+
+
+def upload(path, content_type, sub=EXTRAS):
     url = os.environ.get("DRIVE_UPLOAD_URL")
     if not url:
         print(f"DRIVE_UPLOAD_URL not set; kept {path}")
@@ -172,7 +175,8 @@ def upload(path, content_type):
     for attempt in range(5):
         try:
             s = requests.Session()  # keeps the cookie Apps Script's redirect needs
-            link = s.get(url, params={"name": name, "size": size}, timeout=120).text.strip()
+            params = {"name": name, "size": size, "sub": sub or ""}
+            link = s.get(url, params=params, timeout=120).text.strip()
             if link.startswith("https://"):
                 with open(path, "rb") as f:
                     requests.put(link, data=f, headers={"Content-Type": content_type},
@@ -188,7 +192,7 @@ def upload(path, content_type):
 
 def main():
     src, show, day = sys.argv[1:4]
-    base = f"{day} {show}"
+    base = f"{show} {day} ({time.strftime('%a', time.strptime(day, '%Y-%m-%d'))})"
     segs, duration = transcribe(src)
 
     transcript = f"{base} transcript.txt"
@@ -205,7 +209,7 @@ def main():
 
     removals = find_removals(segs)
     ranges = cut_ranges(segs, duration, removals)
-    clean = f"{base} (no ads).m4a"
+    clean = f"{base}.m4a"
     kept = render_without(src, clean, ranges, duration)
     removed = duration - kept
     print(f"Removed {len(ranges)} stretches, {hms(removed)} of {hms(duration)}", flush=True)
@@ -218,7 +222,7 @@ def main():
             a = min(r.first_line, len(segs) - 1)
             b = min(r.last_line, len(segs) - 1)
             f.write(f"{hms(segs[a][0])}-{hms(segs[b][1])}{clock(segs[a][0])}  {r.kind:20s} {r.note}\n")
-    upload(clean, "audio/mp4")
+    upload(clean, "audio/mp4", sub=None)
     upload(cut_list, "text/plain")
 
 

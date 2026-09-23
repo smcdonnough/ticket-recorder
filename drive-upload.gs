@@ -1,7 +1,7 @@
 // Google Apps Script web app that lets the recorder drop files into Drive.
 // Deploy as: Web app, Execute as "Me", Who has access "Anyone".
-// The recorder calls ?key=...&name=...&size=... and gets back a one-time
-// Drive upload link; each call also deletes recordings older than KEEP_DAYS.
+// The recorder calls ?key=...&name=...&size=...[&sub=subfolder] and gets back a
+// one-time Drive upload link; each call also deletes files older than KEEP_DAYS.
 
 const KEY = 'REPLACE_WITH_SECRET_KEY';
 const FOLDER_NAME = 'The Ticket';
@@ -9,8 +9,10 @@ const KEEP_DAYS = 30;
 
 function doGet(e) {
   if (e.parameter.key !== KEY) return reply_('forbidden');
-  const folder = folder_();
-  cleanup_(folder);
+  const main = folder_();
+  const folder = e.parameter.sub ? subfolder_(main, e.parameter.sub) : main;
+  cleanup_(main);
+  if (folder !== main) cleanup_(folder);
   const res = UrlFetchApp.fetch(
     'https://www.googleapis.com/upload/drive/v3/files?uploadType=resumable', {
       method: 'post',
@@ -30,6 +32,11 @@ function doGet(e) {
 function folder_() {
   const it = DriveApp.getFoldersByName(FOLDER_NAME);
   return it.hasNext() ? it.next() : DriveApp.createFolder(FOLDER_NAME);
+}
+
+function subfolder_(parent, name) {
+  const it = parent.getFoldersByName(name);
+  return it.hasNext() ? it.next() : parent.createFolder(name);
 }
 
 function cleanup_(folder) {
