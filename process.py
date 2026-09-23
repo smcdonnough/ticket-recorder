@@ -75,23 +75,30 @@ def transcribe(path):
     return segs, info.duration
 
 
-def find_removals(segs):
+def find_removals(segs, chunk=1200):
+    """Ask Claude one hour-ish slice at a time; ranges that meet at a seam merge later."""
     import anthropic
 
-    lines = "\n".join(f"{i}|{hms(s)}|{text}" for i, (s, _, text) in enumerate(segs))
-    client = anthropic.Anthropic()
-    response = client.messages.parse(
-        model=CLAUDE_MODEL,
-        max_tokens=16000,
-        system=INSTRUCTIONS,
-        messages=[{"role": "user", "content": lines}],
-        output_format=Removals,
-    )
-    if response.stop_reason == "refusal" or response.parsed_output is None:
-        raise RuntimeError(f"No usable answer (stop_reason={response.stop_reason})")
-    u = response.usage
-    print(f"Claude: {u.input_tokens} input / {u.output_tokens} output tokens", flush=True)
-    return response.parsed_output.removals
+    client = anthropic.Anthropic(max_retries=5)
+    found = []
+    for lo in range(0, len(segs), chunk):
+        hi = min(lo + chunk, len(segs))
+        lines = "\n".join(f"{i}|{hms(segs[i][0])}|{segs[i][2]}" for i in range(lo, hi))
+        response = client.messages.parse(
+            model=CLAUDE_MODEL,
+            max_tokens=16000,
+            system=INSTRUCTIONS,
+            messages=[{"role": "user", "content": lines}],
+            output_format=Removals,
+        )
+        if response.stop_reason in ("refusal", "max_tokens") or response.parsed_output is None:
+            raise RuntimeError(f"No usable answer for lines {lo}-{hi - 1}"
+                               f" (stop_reason={response.stop_reason})")
+        u = response.usage
+        print(f"Claude, lines {lo}-{hi - 1}: {u.input_tokens} in / {u.output_tokens} out tokens,"
+              f" {len(response.parsed_output.removals)} removals", flush=True)
+        found += response.parsed_output.removals
+    return found
 
 
 def cut_ranges(segs, duration, removals):
