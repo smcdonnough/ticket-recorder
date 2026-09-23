@@ -18,6 +18,8 @@ from pydantic import BaseModel
 
 WHISPER_MODEL = os.environ.get("WHISPER_MODEL", "base.en")
 CLAUDE_MODEL = "claude-opus-5"
+PRICE_PER_MTOK = (5.00, 25.00)  # input, output (USD) for CLAUDE_MODEL; update if the model changes
+USAGE = {"in": 0, "out": 0}
 FFMPEG = os.environ.get("FFMPEG", "ffmpeg")
 
 INSTRUCTIONS = """\
@@ -125,6 +127,8 @@ def find_removals(segs, chunk=2500):
             raise RuntimeError(f"No usable answer for lines {lo}-{hi - 1}"
                                f" (stop_reason={response.stop_reason})")
         u = response.usage
+        USAGE["in"] += u.input_tokens
+        USAGE["out"] += u.output_tokens
         print(f"Claude, lines {lo}-{hi - 1}: {u.input_tokens} in / {u.output_tokens} out tokens,"
               f" {len(response.parsed_output.removals)} removals", flush=True)
         found += response.parsed_output.removals
@@ -216,8 +220,11 @@ def main():
 
     cut_list = f"{base} cut list.txt"
     with open(cut_list, "w") as f:
+        cost = (USAGE["in"] * PRICE_PER_MTOK[0] + USAGE["out"] * PRICE_PER_MTOK[1]) / 1e6
         f.write(f"{base}: removed {hms(removed)} of {hms(duration)} in {len(ranges)} breaks"
-                    f" ({len(removals)} items below)\n\n")
+                f" ({len(removals)} items below)\n")
+        f.write(f"AI review cost: ~${cost:.2f} ({USAGE['in']} input / {USAGE['out']} output tokens)\n\n")
+        print(f"AI review cost: ~${cost:.2f}", flush=True)
         for r in sorted(removals, key=lambda r: r.first_line):
             a = min(r.first_line, len(segs) - 1)
             b = min(r.last_line, len(segs) - 1)
