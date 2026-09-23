@@ -1,0 +1,54 @@
+name: Reprocess a recording
+
+# Re-runs transcription + ad removal on a recording from an earlier run of
+# "Record The Ticket" (its hand-off copy is kept for one day).
+on:
+  workflow_dispatch:
+    inputs:
+      run_id:
+        description: Run id of the original recording
+        required: true
+      show:
+        description: Show name used in the file names
+        required: true
+      day:
+        description: Date used in the file names (YYYY-MM-DD)
+        required: true
+      skip_seconds:
+        description: Seconds to crop off the front first (0 = none)
+        default: '0'
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  remove-ads:
+    runs-on: ubuntu-latest
+    timeout-minutes: 300
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: audio
+          run-id: ${{ inputs.run_id }}
+          github-token: ${{ github.token }}
+      - name: Install tools
+        run: |
+          sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg
+          pip install -q faster-whisper anthropic requests pydantic
+      - name: Transcribe, find ads, cut, upload
+        env:
+          PASS: ${{ secrets.DRIVE_UPLOAD_URL }}
+          DRIVE_UPLOAD_URL: ${{ secrets.DRIVE_UPLOAD_URL }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          SHOW: ${{ inputs.show }}
+          DAY: ${{ inputs.day }}
+          SKIP: ${{ inputs.skip_seconds }}
+        run: |
+          openssl enc -d -aes-256-cbc -pbkdf2 -pass env:PASS -in audio.enc -out audio.m4a
+          if [ "${SKIP:-0}" != "0" ]; then
+            ffmpeg -hide_banner -loglevel error -ss "$SKIP" -i audio.m4a -c copy cropped.m4a
+            mv cropped.m4a audio.m4a
+          fi
+          python process.py audio.m4a "$SHOW" "$DAY"

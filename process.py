@@ -37,13 +37,15 @@ Mark for removal:
 Keep everything else: host conversation, interviews, callers, bits, sports talk, and show
 openings/teases that are the hosts talking about the show itself.
 
-Rules:
-- A removal is a contiguous range of lines, first_line to last_line inclusive.
-- Merge adjacent ad material into one range (a break is usually several spots in a row).
-- When a line is genuinely ambiguous, keep it. Cutting show content is worse than leaving
-  a few seconds of an ad.
-- Transcription is imperfect (names and slang are often garbled); judge from context.
-- Return an empty list if nothing should be removed.
+Keep, even right next to a break (these are show content, not ads):
+- the hosts' time checks, "coming up next" teases, and segment intros ("6:18 on the Ticket,
+  coming up next it's...", "you've got the Musers on a Wednesday...")
+- the hosts' own thank-yous and plugs for their own events, charity tournaments (e.g. the
+  DNM Open golf tournament) and podcast, unless it is clearly paid sponsor copy being read
+- short sponsor tags inside a host's segment intro ("the pigskin panel is brought to us by X");
+  they are a few seconds and cutting them would chop the host's sentence
+
+Remove through to its very end: sports/news ticker updates and traffic reports.
 """
 
 
@@ -64,18 +66,35 @@ def hms(t):
 
 
 def transcribe(path):
+    """Short lines (split at sentence ends and pauses) so a cut can land between
+    a host's tease and the ad copy that follows it, instead of taking both."""
     from faster_whisper import WhisperModel
 
     model = WhisperModel(WHISPER_MODEL, device="cpu", compute_type="int8")
     started = time.time()
-    segments, info = model.transcribe(path, beam_size=1, vad_filter=True)
-    segs = [(s.start, s.end, s.text.strip()) for s in segments if s.text.strip()]
+    segments, info = model.transcribe(path, beam_size=1, vad_filter=True, word_timestamps=True)
+    segs, words = [], []
+
+    def flush():
+        text = "".join(w.word for w in words).strip()
+        if text:
+            segs.append((words[0].start, words[-1].end, text))
+        words.clear()
+
+    for seg in segments:
+        for w in seg.words or []:
+            if words and (w.start - words[-1].end > 0.4 or w.start - words[0].start > 10):
+                flush()
+            words.append(w)
+            if w.word.rstrip().endswith((".", "?", "!")):
+                flush()
+        flush()
     print(f"Transcribed {hms(info.duration)} of audio in {hms(time.time() - started)}"
           f" ({len(segs)} lines)", flush=True)
     return segs, info.duration
 
 
-def find_removals(segs, chunk=1200):
+def find_removals(segs, chunk=2500):
     """Ask Claude one hour-ish slice at a time; ranges that meet at a seam merge later."""
     import anthropic
 
