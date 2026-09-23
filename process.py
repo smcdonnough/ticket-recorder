@@ -224,6 +224,19 @@ def main():
             f.write(f"{hms(segs[a][0])}-{hms(segs[b][1])}{clock(segs[a][0])}  {r.kind:20s} {r.note}\n")
     upload(clean, "audio/mp4", sub=None)
     upload(cut_list, "text/plain")
+    refresh_feed()
+
+
+def refresh_feed():
+    """Ask the Apps Script to rebuild the podcast feed now that a new show is in."""
+    url = os.environ.get("DRIVE_UPLOAD_URL")
+    if not url:
+        return
+    try:
+        r = requests.Session().get(url, params={"action": "feed"}, timeout=180)
+        print(f"Podcast feed refreshed: {r.text.strip()[:60]}...", flush=True)
+    except requests.RequestException as e:
+        print(f"Podcast feed refresh failed (next show will retry): {e}")
 
 
 if __name__ == "__main__":
