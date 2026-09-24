@@ -31,9 +31,13 @@ Mark for removal:
 - commercial spots (pre-produced ads: sponsor names, prices, phone numbers, web addresses,
   "call now", "visit", disclaimers, jingles)
 - live reads: the hosts reading sponsor copy themselves, including the host's lead-in into
-  the read ("this hour brought to you by...", "let me tell you about...") and the tag out
+  the read ("this hour brought to you by...", "let me tell you about...", "but first I need
+  to talk to you about...") and the tag out
 - traffic and weather updates, news breaks
-- station promos, imaging and station IDs, promos for other shows or events
+- station promos, imaging and station IDs, promos for other shows or events, even when a
+  single one sits alone between two show segments (e.g. "this is Sportsradio 96.7 and 1310
+  the Ticket, broadcasting live from the TXU Energy Mothership", "the Ticket has hot sports
+  opinions...", "follow us on Facebook, YouTube, Twitch...")
 - network programming breaks that are ads (e.g. overnight Fox Sports Radio commercial breaks)
 
 Keep everything else: host conversation, interviews, callers, bits, sports talk, and show
