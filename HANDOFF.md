@@ -1,8 +1,8 @@
 # HANDOFF — ticket-recorder (as of 2026-09-26)
 
 Built 9/22–9/25 in a session that started in the pipeline-routine repo; moved here 9/26.
-Nothing about the recorder depends on that session. Only the scheduled check-ins below were
-bound to it and must be re-created from whichever session takes over.
+Nothing about the recorder depends on that session. The scheduled check-ins below were
+re-created in the ticket-recorder session on 9/26.
 
 ## What runs, end to end
 
@@ -15,8 +15,8 @@ bound to it and must be re-created from whichever session takes over.
    (Musers 6:00–9:00, Hardline 3:00–7:00; the 5:30 pregame is cropped by design). It uploads
    "<Show> <date> (<Day>) full with ads.m4a" to the Drive subfolder and hands the file to the
    next job as a 1-day artifact encrypted with the `DRIVE_UPLOAD_URL` secret (the repo is public).
-3. **Remove ads** (`process.py`). faster-whisper base.en with word timestamps, lines split at
-   sentence ends/pauses. Claude (`claude-opus-5`) reviews ~2,500-line slices and returns line
+3. **Remove ads** (`process.py`). faster-whisper base.en with word timestamps, each 30 s window
+   transcribed fresh (`condition_on_previous_text=False`), lines split at sentence ends/pauses. Claude (`claude-opus-5`) reviews ~2,500-line slices and returns line
    ranges to remove. ffmpeg drops them, re-encodes AAC 64k, and uploads
    "<Show> <date> (<Day>).m4a" to the main folder plus the transcript and cut list (with
    approximate clock times and AI cost) to the subfolder. It then asks the Apps Script to
@@ -32,8 +32,9 @@ bound to it and must be re-created from whichever session takes over.
 
 - Drive main folder "The Ticket": `1simlYEztkruDeFOsxzQCck0_U32PkmUN` (only ad-free episodes).
 - Subfolder "Full recordings & transcripts": `1oLvwwjvZ-WRy9Vo6xb3f-BZ1yb_apMSQ`.
-- Podcast feed (Sean follows it in Apple Podcasts; works):
-  `https://drive.usercontent.google.com/download?id=1n5J-ZyIxSqUXoxDn8X5fLeHq_7LtuWRr&export=download&confirm=t`
+- Podcast feed (Sean follows it in Apple Podcasts; works): `feed.xml` in the subfolder, at
+  `https://drive.usercontent.google.com/download?id=<feed.xml id>&export=download&confirm=t`.
+  Keep the real address out of this public repo: anyone with it can download every episode.
   (`confirm=t` is required: Drive flags .xml as executable and serves a warning page otherwise.)
 - Secrets: repo secrets `DRIVE_UPLOAD_URL` (Apps Script URL + `?key=`) and `ANTHROPIC_API_KEY`.
   The Apps Script key is in Sean's deployed script. Never commit either.
@@ -62,19 +63,35 @@ bound to it and must be re-created from whichever session takes over.
 - Break pattern seen so far (Musers): roughly :11–:19, :36–:42 and :51–:01 each hour. The
   Hardline has 13 breaks of 5–9 min and a ticker at about :03 and :23.
 - Cost per show: Musers ~45¢, Hardline ~66¢.
+- 9/23–9/25: Whisper stopped punctuating for the last 1.5–2.5 h of every Hardline (and 2 h of
+  the 9/24 Musers), so lines ran host talk into ad copy and three 9/24 Hardline cuts took a few
+  seconds of host talk. Cause: `condition_on_previous_text` (on by default). Turned off 9/26.
+  Tested on the 9/24 Hardline episode: longest unpunctuated stretch 24 min → 75 s (the rest are
+  isolated ≤75 s lapses, ~20 of 144 min), same speed, same amount of text, ~50% more lines.
+- Input cost is ~1,900 tokens per call + ~12.3 tokens per transcript line (line number and
+  timestamp) + ~0.27 per character of text (fit to all 11 calls 9/23–9/25, within 4%). The line
+  labels are 32–53% of input, and the turn-off above adds lines: expect ~20% more per show.
+- Review-window check (9/26, 3 days, windows learned from 2 days and tested on the third):
+  Musers breaks repeat within a couple of minutes (~:11–:21, :35–:45, :51–:02); ±3 min windows
+  missed nothing and would send 75% of the tokens. Hardline breaks drift up to ~5 min: ±5 min
+  windows miss nothing but send 93%; ±3 min send 78% and leave ~70 s of ads per show.
 
 ## Check-ins (Claude Code Routines)
 
-These were bound to the old session (`session_01UCgeijFb58WcZUSZfjEds2`). The new session should
-re-create each one bound to itself, with the same prompt text, then delete the old one. Get the
-current prompt text with `get_trigger`.
+Moved 9/26 from the old session (`session_01UCgeijFb58WcZUSZfjEds2`) to the ticket-recorder
+session (`session_01FPfwPSpAXKMqFaqoLuxdKy`): same prompt text and schedule, old ones deleted.
+Starting a show from the new session was checked the same day (a Musers start on a Saturday,
+which exited "past 09:05, nothing to record"). If the recorder moves again, re-create each one
+bound to the new session with the prompt text from `get_trigger`, then delete these.
 
-| Old id | What | When (UTC) |
+| Id | What | When (UTC) |
 |---|---|---|
-| trig_01Get2n89jmg8WXVt6UbZ8VH | Start Musers if no run is recording; check last Hardline's remove-ads | 15 10 * * 1-5 |
-| trig_01Sk98DEQ55f9MKJ6XVFq5yU | Start Hardline if no run is recording; check this morning's Musers | 45 19 * * 1-5 |
-| trig_01DZBuCTq33GKrt75S1fG2ZX | Weekly cost report to Sean (Mondays 9 AM CT) | 0 14 * * 1 |
-| trig_01VYG12tq7e3L5H4R48v7AYq | One-shot: propose break-window review from the cut lists | 2026-10-01T15:00Z |
+| trig_015eTt6C3HL7AV7vZfvoSBkM | Start Musers if no run is recording; check last Hardline's remove-ads | 15 10 * * 1-5 |
+| trig_01CG3MMQftyZKXfhKzbHPH2K | Start Hardline if no run is recording; check this morning's Musers | 45 19 * * 1-5 |
+| trig_01B46Ps9L3wcTaYFSeG6sJLb | Weekly cost report to Sean (Mondays 9 AM CT) | 0 14 * * 1 |
+| trig_01Lsj6VzWEjnof63PRHFQsi2 | One-shot: propose break-window review from the cut lists | 2026-10-01T15:00Z |
+
+The one-shot's prompt says the cut lists are in the main folder; they are in the subfolder.
 
 Do not touch the pipeline-routine (job search) routines, e.g. "Morning Brief". They are
 unrelated.
@@ -86,3 +103,6 @@ unrelated.
 - The Anthropic credit is prepaid ($10 initially). Remind Sean about auto-reload or a top-up if
   runs start failing with auth/billing errors.
 - The Node 20 deprecation warning on actions/checkout@v4 is harmless for now.
+- Transcripts and cut lists land in Drive as `audio/mp4`: `drive-upload.gs` sends
+  `X-Upload-Content-Type: audio/mp4` for every upload. Fold a fix (pass the type through) into
+  the next Apps Script change rather than asking Sean to redeploy for this alone.

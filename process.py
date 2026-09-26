@@ -89,7 +89,11 @@ def transcribe(path):
 
     model = WhisperModel(WHISPER_MODEL, device="cpu", compute_type="int8")
     started = time.time()
-    segments, info = model.transcribe(path, beam_size=1, vad_filter=True, word_timestamps=True)
+    # condition_on_previous_text=False: when each window was primed with the text before
+    # it, Whisper drifted into unpunctuated text and stayed there, for the last 1.5-2.5 h
+    # of every Hardline 9/23-9/25, which left no sentence ends to cut at.
+    segments, info = model.transcribe(path, beam_size=1, vad_filter=True, word_timestamps=True,
+                                      condition_on_previous_text=False)
     segs, words = [], []
 
     def flush():
