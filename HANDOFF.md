@@ -70,7 +70,9 @@ re-created in the ticket-recorder session on 9/26.
   isolated ≤75 s lapses, ~20 of 144 min), same speed, same amount of text, ~50% more lines.
 - Input cost is ~1,900 tokens per call + ~12.3 tokens per transcript line (line number and
   timestamp) + ~0.27 per character of text (fit to all 11 calls 9/23–9/25, within 4%). The line
-  labels are 32–53% of input, and the turn-off above adds lines: expect ~20% more per show.
+  labels are 32–53% of input. The turn-off above changes line counts only where punctuation
+  used to drift (test: −8% tokens where it was fine, +38% where it had drifted), so expect
+  ~15–20% more per Hardline and about the same per Musers, ~$2–3/month.
 - Review-window check (9/26, 3 days, windows learned from 2 days and tested on the third):
   Musers breaks repeat within a couple of minutes (~:11–:21, :35–:45, :51–:02); ±3 min windows
   missed nothing and would send 75% of the tokens. Hardline breaks drift up to ~5 min: ±5 min
