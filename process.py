@@ -124,19 +124,23 @@ def find_removals(segs, chunk=2500):
     for lo in range(0, len(segs), chunk):
         hi = min(lo + chunk, len(segs))
         lines = "\n".join(f"{i}|{hms(segs[i][0])}|{segs[i][2]}" for i in range(lo, hi))
-        response = client.messages.parse(
+        # Streamed so the answer can run long: on 9/28 the Musers' first slice used up all
+        # of a 16,000-token limit (mostly thinking) and the show got no ad-free copy.
+        with client.messages.stream(
             model=CLAUDE_MODEL,
-            max_tokens=16000,
+            max_tokens=64000,
             system=INSTRUCTIONS,
             messages=[{"role": "user", "content": lines}],
             output_format=Removals,
-        )
-        if response.stop_reason in ("refusal", "max_tokens") or response.parsed_output is None:
-            raise RuntimeError(f"No usable answer for lines {lo}-{hi - 1}"
-                               f" (stop_reason={response.stop_reason})")
+        ) as stream:
+            response = stream.get_final_message()
         u = response.usage
         USAGE["in"] += u.input_tokens
         USAGE["out"] += u.output_tokens
+        if response.stop_reason in ("refusal", "max_tokens") or response.parsed_output is None:
+            raise RuntimeError(f"No usable answer for lines {lo}-{hi - 1}"
+                               f" (stop_reason={response.stop_reason},"
+                               f" {u.input_tokens} in / {u.output_tokens} out tokens)")
         print(f"Claude, lines {lo}-{hi - 1}: {u.input_tokens} in / {u.output_tokens} out tokens,"
               f" {len(response.parsed_output.removals)} removals", flush=True)
         found += response.parsed_output.removals
