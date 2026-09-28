@@ -73,6 +73,16 @@ re-created in the ticket-recorder session on 9/26.
   labels are 32–53% of input. The turn-off above changes line counts only where punctuation
   used to drift (test: −8% tokens where it was fine, +38% where it had drifted), so expect
   ~15–20% more per Hardline and about the same per Musers, ~$2–3/month.
+- 9/28 Musers: the first slice's answer (mostly adaptive thinking) hit the 16,000-token cap,
+  the job failed and no ad-free copy was made (~$0.70 spent). The same slice re-run took 970
+  output tokens, so it was a one-off runaway. Now streamed with a 64,000 cap; re-run through
+  `reprocess.yml` on the fix ($0.48, in the feed 9:33 AM). A runaway can now cost up to ~$1.60
+  in output per slice before the cap, so watch for large "out" counts in the log.
+- The first transcript with the fix (9/28 Musers) stayed punctuated the whole show (54–75% of
+  lines per 10 min end in . ? !; longest gap 2.4 min).
+- AI spend 9/22–9/25: $3.70 (incl. ~$0.52 one-off: two 10-min tests and the 9/23 Musers run
+  twice). 9/28: Musers $0.48 + the failed ~$0.70. The credit started at $10 prepaid (Open
+  items); if never topped up, ~$5 was left after the 9/28 Musers, about a week of shows.
 - Review-window check (9/26, 3 days, windows learned from 2 days and tested on the third):
   Musers breaks repeat within a couple of minutes (~:11–:21, :35–:45, :51–:02); ±3 min windows
   missed nothing and would send 75% of the tokens. Hardline breaks drift up to ~5 min: ±5 min
