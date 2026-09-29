@@ -115,6 +115,37 @@ def transcribe(path):
     return segs, info.duration
 
 
+def ask_claude(client, lines, tries=36, wait=300):
+    """One slice. The SDK's own retries last ~20 s; an outage on 9/29 lasted ~2 h and cost
+    the Musers its ad-free copy, so server-side errors are retried every 5 min for ~3 h.
+    Anything else (a bad request, a bad key) still fails at once."""
+    import anthropic
+
+    for attempt in range(tries):
+        try:
+            # Streamed so the answer can run long: on 9/28 the Musers' first slice used up
+            # all of a 16,000-token limit (mostly thinking) and got no ad-free copy.
+            with client.messages.stream(
+                model=CLAUDE_MODEL,
+                max_tokens=64000,
+                system=INSTRUCTIONS,
+                messages=[{"role": "user", "content": lines}],
+                output_format=Removals,
+            ) as stream:
+                return stream.get_final_message()
+        except (anthropic.APIStatusError, anthropic.APIConnectionError) as e:
+            # Errors sent mid-stream arrive with the stream's 200 status; read their type.
+            body = getattr(e, "body", None)
+            kind = body.get("error", {}).get("type") if isinstance(body, dict) else None
+            status = getattr(e, "status_code", 0)
+            outage = (isinstance(e, anthropic.APIConnectionError) or status >= 500
+                      or status == 429 or kind in ("api_error", "overloaded_error"))
+            if not outage or attempt == tries - 1:
+                raise
+            print(f"Claude unavailable ({e}); trying again in {wait // 60} min", flush=True)
+            time.sleep(wait)
+
+
 def find_removals(segs, chunk=2500):
     """Ask Claude one hour-ish slice at a time; ranges that meet at a seam merge later."""
     import anthropic
@@ -124,16 +155,7 @@ def find_removals(segs, chunk=2500):
     for lo in range(0, len(segs), chunk):
         hi = min(lo + chunk, len(segs))
         lines = "\n".join(f"{i}|{hms(segs[i][0])}|{segs[i][2]}" for i in range(lo, hi))
-        # Streamed so the answer can run long: on 9/28 the Musers' first slice used up all
-        # of a 16,000-token limit (mostly thinking) and the show got no ad-free copy.
-        with client.messages.stream(
-            model=CLAUDE_MODEL,
-            max_tokens=64000,
-            system=INSTRUCTIONS,
-            messages=[{"role": "user", "content": lines}],
-            output_format=Removals,
-        ) as stream:
-            response = stream.get_final_message()
+        response = ask_claude(client, lines)
         u = response.usage
         USAGE["in"] += u.input_tokens
         USAGE["out"] += u.output_tokens

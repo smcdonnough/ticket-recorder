@@ -78,6 +78,11 @@ re-created in the ticket-recorder session on 9/26.
   output tokens, so it was a one-off runaway. Now streamed with a 64,000 cap; re-run through
   `reprocess.yml` on the fix ($0.48, in the feed 9:33 AM). A runaway can now cost up to ~$1.60
   in output per slice before the cap, so watch for large "out" counts in the log.
+- 9/29 Musers: the review failed at 14:16 UTC with a 500 "credential validation failed" after
+  the SDK's ~20 s of retries, during a provider outage (status page: 14:21–16:27 UTC). The key
+  was fine. Failed job re-run at 17:27. Server-side errors (5xx, 429, overloaded, connection)
+  are now retried every 5 min for ~3 h; auth and bad-request errors still fail at once.
+  Outages were frequent in September (9/3, 9/10, 9/11, 9/15, 9/22, 9/29).
 - The first transcript with the fix (9/28 Musers) stayed punctuated the whole show (54–75% of
   lines per 10 min end in . ? !; longest gap 2.4 min).
 - AI spend 9/22–9/25: $3.70 (incl. ~$0.52 one-off: two 10-min tests and the 9/23 Musers run
