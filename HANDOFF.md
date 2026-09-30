@@ -113,6 +113,12 @@ bound to the new session with the prompt text from `get_trigger`, then delete th
 | trig_01CG3MMQftyZKXfhKzbHPH2K | Start Hardline if no run is recording; check this morning's Musers | 45 19 * * 1-5 |
 | trig_01B46Ps9L3wcTaYFSeG6sJLb | Weekly cost report to Sean (Mondays 9 AM CT) | 0 14 * * 1 |
 | trig_01Lsj6VzWEjnof63PRHFQsi2 | One-shot: propose break-window review from the cut lists | 2026-10-01T15:00Z |
+| trig_015yeNSowRzSuPkiLuF7437r | Post-show: Musers in the feed? Fix and re-run if not (added 9/30) | 45 9 * * 1-5 Central |
+| trig_01Lr9LyTCJBcoY4FN2DvHV2z | Post-show: Hardline in the feed? Fix and re-run if not (added 9/30) | 45 19 * * 1-5 Central |
+
+The post-show pair were added after 9/29, when the Hardline failed at 7:06 PM and nothing
+looked until the next start check at 5:15 AM (Sean noticed first). They use CRON_TZ so they
+stay at 9:45 AM / 7:45 PM Central across DST.
 
 The one-shot's prompt says the cut lists are in the main folder; they are in the subfolder.
 
