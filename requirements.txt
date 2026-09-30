@@ -1,0 +1,9 @@
+# Pinned for process.py (remove-ads and reprocess jobs). Unpinned, a new release broke the
+# 9/29 Hardline: av 19.0.0 (Python >= 3.12 only) dropped av.open(metadata_errors=...), which
+# faster-whisper 1.2.1 still passes. Bump deliberately, with a reprocess run to check.
+faster-whisper==1.2.1
+av==18.1.0
+ctranslate2==4.8.2
+anthropic==1.9.0
+pydantic==2.13.5
+requests==2.34.2

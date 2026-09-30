@@ -36,7 +36,7 @@ jobs:
       - name: Install tools
         run: |
           sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg
-          pip install -q faster-whisper anthropic requests pydantic
+          pip install -q -r requirements.txt
       - name: Transcribe, find ads, cut, upload
         env:
           PASS: ${{ secrets.DRIVE_UPLOAD_URL }}
