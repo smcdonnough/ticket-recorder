@@ -83,6 +83,11 @@ re-created in the ticket-recorder session on 9/26.
   was fine. Failed job re-run at 17:27. Server-side errors (5xx, 429, overloaded, connection)
   are now retried every 5 min for ~3 h; auth and bad-request errors still fail at once.
   Outages were frequent in September (9/3, 9/10, 9/11, 9/15, 9/22, 9/29).
+- 9/29 Hardline: remove-ads died 4 s in. av 19.0.0 (released 9/29 17:47 UTC, Python >= 3.12
+  only, which the runner has) dropped `av.open(metadata_errors=...)`, which faster-whisper
+  1.2.1 passes. The Python packages are now pinned in `requirements.txt` (the versions the
+  shows ran on that week); bump them on purpose and check with a reprocess run. Recovered with
+  `reprocess.yml` the same night.
 - The first transcript with the fix (9/28 Musers) stayed punctuated the whole show (54–75% of
   lines per 10 min end in . ? !; longest gap 2.4 min).
 - AI spend 9/22–9/25: $3.70 (incl. ~$0.52 one-off: two 10-min tests and the 9/23 Musers run
