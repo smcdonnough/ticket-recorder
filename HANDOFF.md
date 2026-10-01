@@ -98,6 +98,15 @@ re-created in the ticket-recorder session on 9/26.
   Musers breaks repeat within a couple of minutes (~:11–:21, :35–:45, :51–:02); ±3 min windows
   missed nothing and would send 75% of the tokens. Hardline breaks drift up to ~5 min: ±5 min
   windows miss nothing but send 93%; ±3 min send 78% and leave ~70 s of ads per show.
+- Redone 10/1 with 7 Musers / 6 Hardline days (leave-one-out): Musers ±2 min reviews 74% and
+  missed nothing; Hardline ±3 min reviews 89% and missed nothing (±2 min reviews 80% but left
+  ~30 s/show, incl. a 57 s All Pro Foundation Repair read 9/29 5:33 PM). Avg cost per show
+  Musers $0.49, Hardline $0.60 (~$24/month); windows would save ~$4/month. Proposed to Sean 10/1
+  along with the still-open line-label trim (~20%) and batch (50%) options.
+- 9/30 Hardline: the AI listed 3:27:22–3:27:51 (~6:25 PM, 29 s) with the note "actually host
+  content, keep", and it was cut: everything in the answer is cut. Only case in 13 shows. Add
+  "list only what to remove; leave out anything you decide to keep" to `INSTRUCTIONS` with the
+  next ad-rule change that gets a reprocess run anyway, not as its own paid run.
 
 ## Check-ins (Claude Code Routines)
 
