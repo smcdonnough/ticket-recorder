@@ -141,6 +141,9 @@ unrelated.
 - The Anthropic credit is prepaid ($10 initially). Remind Sean about auto-reload or a top-up if
   runs start failing with auth/billing errors.
 - The Node 20 deprecation warning on actions/checkout@v4 is harmless for now.
+- 10/1: a late backup run's "Install ffmpeg" took 13 min (usually under 1 min). The Hardline
+  check at 2:45 PM CDT reaches "Record and upload" ~2:47, only ~11 min before the 2:58 crop
+  start. If slow installs recur, move that check earlier (the Musers check has 45 min spare).
 - Transcripts and cut lists land in Drive as `audio/mp4`: `drive-upload.gs` sends
   `X-Upload-Content-Type: audio/mp4` for every upload. Fold a fix (pass the type through) into
   the next Apps Script change rather than asking Sean to redeploy for this alone.
