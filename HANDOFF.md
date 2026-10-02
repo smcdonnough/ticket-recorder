@@ -139,7 +139,9 @@ unrelated.
 - 11/1 DST: the UTC check-in times become 4:15 AM / 1:45 PM CST. Recording still works: a
   Hardline started at 1:45 PM runs ~5 h 20 m, under the 350-min job limit.
 - The Anthropic credit is prepaid ($10 initially). Remind Sean about auto-reload or a top-up if
-  runs start failing with auth/billing errors.
+  runs start failing with auth/billing errors. If never topped up, ~$1 was left after the 10/1
+  Hardline ($0.64), so it runs out around the 10/2 Hardline; he was reminded 9/28 and 10/1. A
+  "credit balance is too low" failure needs his top-up, then a `reprocess.yml` run within a day.
 - The Node 20 deprecation warning on actions/checkout@v4 is harmless for now.
 - 10/1: a late backup run's "Install ffmpeg" took 13 min (usually under 1 min). The Hardline
   check at 2:45 PM CDT reaches "Record and upload" ~2:47, only ~11 min before the 2:58 crop
