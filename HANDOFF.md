@@ -141,9 +141,15 @@ unrelated.
 - The Anthropic credit is prepaid ($10 initially). Remind Sean about auto-reload or a top-up if
   runs start failing with auth/billing errors. Spend by the cut lists: 9/22–9/25 $3.70, week of
   9/28 $6.55 (incl. the failed ~$0.70; 10/2: Musers $0.45, Hardline $0.78), so ~$10.25 in all.
-  The 10/2 Hardline still went through. If he never topped up, the balance is about −$0.25 and
-  the 10/5 Musers will fail; he was told 9/28, 10/1 and 10/2 evening. A "credit balance is too
-  low" failure needs his top-up, then a `reprocess.yml` run within a day.
+  The 10/2 Hardline and the 10/5 Musers still went through, so he topped up (or started with
+  more); he was told 9/28, 10/1 and 10/2. He hasn't said whether auto-reload is on. A "credit
+  balance is too low" failure needs his top-up, then a `reprocess.yml` run within a day.
+- Weekly report 10/5: week of 9/28 $6.55; at that week's rate (Musers ~$0.52, Hardline ~$0.65)
+  October is ~$26, over the ~$23 budget, until he picks a savings option.
+- Drive storage: ~2.5 GB live on 10/5 (~290 MB per weekday). The cleanup trashes files, and
+  trash counts toward his quota until Drive empties it after 30 days, so from late October the
+  total heads for ~13 GB (30 days live + 30 in trash). If his quota is the free 15 GB, make the
+  cleanup delete permanently in the next Apps Script change.
 - The Node 20 deprecation warning on actions/checkout@v4 is harmless for now.
 - 10/1: a late backup run's "Install ffmpeg" took 13 min (usually under 1 min). The Hardline
   check at 2:45 PM CDT reaches "Record and upload" ~2:47, only ~11 min before the 2:58 crop
