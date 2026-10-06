@@ -107,6 +107,13 @@ re-created in the ticket-recorder session on 9/26.
   content, keep", and it was cut: everything in the answer is cut. Only case in 13 shows. Add
   "list only what to remove; leave out anything you decide to keep" to `INSTRUCTIONS` with the
   next ad-rule change that gets a reprocess run anyway, not as its own paid run.
+- 10/5 Hardline: GitHub runner outage (status page: from 19:11 UTC). Queued jobs got no runner
+  and were cancelled after ~15 min (the 19:32 scheduled trigger and the 19:46 dispatch); the
+  20:02 dispatch got a runner at 20:12 and recorded from 3:13 PM, so the episode (3:49 long, in
+  the feed 7:20 PM) misses the first ~13 min. During such an outage, re-dispatch every ~15 min.
+  A backup of 2:47–3:45 PM was recorded with curl in the session scratchpad
+  (`backup_hardline_1005/`); moving it to GitHub was blocked by the session's safety settings
+  and waits on Sean's "go ahead" (asked 10/5). The reprocess hand-off copy expires ~00:05 UTC 10/7.
 
 ## Check-ins (Claude Code Routines)
 
