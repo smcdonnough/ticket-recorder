@@ -114,6 +114,8 @@ re-created in the ticket-recorder session on 9/26.
   A backup of 2:47–3:45 PM was recorded with curl in the session scratchpad
   (`backup_hardline_1005/`); moving it to GitHub was blocked by the session's safety settings
   and waits on Sean's "go ahead" (asked 10/5). The reprocess hand-off copy expires ~00:05 UTC 10/7.
+- 10/6 Hardline check: starting the run returned HTTP 500 three times over ~1.5 min (status
+  page all green), then worked; recording from 2:47 PM. Retry for a few minutes before worrying.
 
 ## Check-ins (Claude Code Routines)
 
