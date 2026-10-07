@@ -66,6 +66,14 @@ if [[ -n "${AIR_START:-}" ]]; then
   echo "Cropping to air time: ${CROP[*]:-(nothing to crop)}"
 fi
 OUT="$WORK/$SHOW $DAY ($(date -d "$DAY" +%a)) full with ads.m4a"
+# record.yml installs ffmpeg in the background while recording; wait for it, then install it
+# here if that hasn't worked (the lock timeout waits out an apt still running in the background).
+if ! command -v "$FFMPEG" >/dev/null; then
+  echo "Waiting for ffmpeg..."
+  for _ in $(seq 90); do command -v "$FFMPEG" >/dev/null && break; sleep 10; done
+  command -v "$FFMPEG" >/dev/null || { sudo apt-get -o DPkg::Lock::Timeout=900 update -qq &&
+    sudo apt-get -o DPkg::Lock::Timeout=900 install -y -qq ffmpeg; }
+fi
 "$FFMPEG" -hide_banner -loglevel error -i "$WORK/all.aac" "${CROP[@]}" -c copy -movflags +faststart "$OUT"
 SIZE=$(stat -c %s "$OUT")
 echo "Recorded $(( SIZE / 1048576 )) MB"

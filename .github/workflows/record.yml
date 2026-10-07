@@ -41,8 +41,10 @@ jobs:
       clock0: ${{ steps.rec.outputs.clock0 }}
     steps:
       - uses: actions/checkout@v4
-      - name: Install ffmpeg
-        run: sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg
+      # ffmpeg is only needed once recording ends. Installed in the background so a slow apt
+      # mirror can't hold up the start (13 min on 10/1, 8+ min on 10/7); record.sh waits for it.
+      - name: Install ffmpeg (background)
+        run: (sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg) > "$RUNNER_TEMP/apt.log" 2>&1 &
       - name: Record and upload
         id: rec
         env:
