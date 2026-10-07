@@ -116,6 +116,10 @@ re-created in the ticket-recorder session on 9/26.
   and waits on Sean's "go ahead" (asked 10/5). The reprocess hand-off copy expires ~00:05 UTC 10/7.
 - 10/6 Hardline check: starting the run returned HTTP 500 three times over ~1.5 min (status
   page all green), then worked; recording from 2:47 PM. Retry for a few minutes before worrying.
+- 10/7 Hardline: two runners hung in apt (see Open items); the third run, on the background-
+  install fix, recorded from 2:59 PM. A curl backup of 2:57 PM onward ran in the session
+  scratchpad (`backup_hardline_1007/`) in case the fixed run failed at the end; delete it once
+  the episode is in the feed.
 
 ## Check-ins (Claude Code Routines)
 
@@ -160,9 +164,11 @@ unrelated.
   total heads for ~13 GB (30 days live + 30 in trash). If his quota is the free 15 GB, make the
   cleanup delete permanently in the next Apps Script change.
 - The Node 20 deprecation warning on actions/checkout@v4 is harmless for now.
-- 10/1: a late backup run's "Install ffmpeg" took 13 min (usually under 1 min). The Hardline
-  check at 2:45 PM CDT reaches "Record and upload" ~2:47, only ~11 min before the 2:58 crop
-  start. If slow installs recur, move that check earlier (the Musers check has 45 min spare).
+- Slow apt: "Install ffmpeg" took 13 min on 10/1 and hung 8+ min on two runners in a row on
+  10/7 (a normal cancel didn't stop it; `gh api -X POST .../runs/<id>/force-cancel` did). Since
+  10/7 the record job installs ffmpeg in the background and starts recording right after
+  checkout; record.sh waits for ffmpeg (or installs it) before cropping. Tested with a Test run
+  the same day (remove-ads cancelled so no test episode reached the feed).
 - Transcripts and cut lists land in Drive as `audio/mp4`: `drive-upload.gs` sends
   `X-Upload-Content-Type: audio/mp4` for every upload. Fold a fix (pass the type through) into
   the next Apps Script change rather than asking Sean to redeploy for this alone.
