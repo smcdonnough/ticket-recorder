@@ -111,15 +111,14 @@ re-created in the ticket-recorder session on 9/26.
   and were cancelled after ~15 min (the 19:32 scheduled trigger and the 19:46 dispatch); the
   20:02 dispatch got a runner at 20:12 and recorded from 3:13 PM, so the episode (3:49 long, in
   the feed 7:20 PM) misses the first ~13 min. During such an outage, re-dispatch every ~15 min.
-  A backup of 2:47–3:45 PM was recorded with curl in the session scratchpad
-  (`backup_hardline_1005/`); moving it to GitHub was blocked by the session's safety settings
-  and waits on Sean's "go ahead" (asked 10/5). The reprocess hand-off copy expires ~00:05 UTC 10/7.
+  A backup of 2:47–3:45 PM was recorded with curl in the session scratchpad; moving it to
+  GitHub was blocked by the session's safety settings and Sean didn't answer the "go ahead" ask,
+  so it was deleted 10/8 (the hand-off copy had expired).
 - 10/6 Hardline check: starting the run returned HTTP 500 three times over ~1.5 min (status
   page all green), then worked; recording from 2:47 PM. Retry for a few minutes before worrying.
 - 10/7 Hardline: two runners hung in apt (see Open items); the third run, on the background-
-  install fix, recorded from 2:59 PM. A curl backup of 2:57 PM onward ran in the session
-  scratchpad (`backup_hardline_1007/`) in case the fixed run failed at the end; delete it once
-  the episode is in the feed.
+  install fix, recorded from 2:59 PM; full 4:02:54 episode in the feed 7:22 PM, so the fix
+  held on a real show. The curl backup kept in the scratchpad meanwhile was deleted.
 
 ## Check-ins (Claude Code Routines)
 
