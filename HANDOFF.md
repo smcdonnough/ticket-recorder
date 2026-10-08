@@ -168,6 +168,10 @@ unrelated.
   10/7 the record job installs ffmpeg in the background and starts recording right after
   checkout; record.sh waits for ffmpeg (or installs it) before cropping. Tested with a Test run
   the same day (remove-ads cancelled so no test episode reached the feed).
+  10/8: the remove-ads job's own "Install tools" (same apt install) took 29 min, so the Musers
+  reached the feed at 9:42 AM instead of ~9:15. If that keeps happening, give remove-ads the
+  same treatment (process.py only needs the ffmpeg binary for the final cut) or switch both
+  jobs to a pinned pip-installed static ffmpeg; test with `reprocess.yml`.
 - Transcripts and cut lists land in Drive as `audio/mp4`: `drive-upload.gs` sends
   `X-Upload-Content-Type: audio/mp4` for every upload. Fold a fix (pass the type through) into
   the next Apps Script change rather than asking Sean to redeploy for this alone.
