@@ -158,6 +158,8 @@ unrelated.
   balance is too low" failure needs his top-up, then a `reprocess.yml` run within a day.
 - Weekly report 10/5: week of 9/28 $6.55; at that week's rate (Musers ~$0.52, Hardline ~$0.65)
   October is ~$26, over the ~$23 budget, until he picks a savings option.
+- Weekly report 10/12: week of 10/5 $5.42 (Musers $0.46–0.54, Hardline $0.57–0.63; no failed
+  runs that cost). October on track for ~$24. Drive ~4 GB live.
 - Drive storage: ~2.5 GB live on 10/5 (~290 MB per weekday). The cleanup trashes files, and
   trash counts toward his quota until Drive empties it after 30 days, so from late October the
   total heads for ~13 GB (30 days live + 30 in trash). If his quota is the free 15 GB, make the
