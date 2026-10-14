@@ -171,6 +171,7 @@ unrelated.
 - Runners pinned to `ubuntu-24.04` (all three jobs) on 10/14: GitHub moves `ubuntu-latest` to
   Ubuntu 26 from 10/19, which could change the apt ffmpeg and Python versions under the pinned
   packages. Move to the new image on purpose later (check with a Test run and `reprocess.yml`).
+  First real show on the pin: 10/14 Musers, in the feed 9:15 AM.
 - Slow apt: "Install ffmpeg" took 13 min on 10/1 and hung 8+ min on two runners in a row on
   10/7 (a normal cancel didn't stop it; `gh api -X POST .../runs/<id>/force-cancel` did). Since
   10/7 the record job installs ffmpeg in the background and starts recording right after
