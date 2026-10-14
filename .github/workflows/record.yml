@@ -32,7 +32,7 @@ permissions:
 
 jobs:
   record:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 350
     outputs:
       recorded: ${{ steps.rec.outputs.recorded }}
@@ -95,7 +95,7 @@ jobs:
   remove-ads:
     needs: record
     if: needs.record.outputs.recorded == 'true'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 300
     steps:
       - uses: actions/checkout@v4

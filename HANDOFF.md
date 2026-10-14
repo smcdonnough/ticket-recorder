@@ -119,6 +119,9 @@ re-created in the ticket-recorder session on 9/26.
 - 10/7 Hardline: two runners hung in apt (see Open items); the third run, on the background-
   install fix, recorded from 2:59 PM; full 4:02:54 episode in the feed 7:22 PM, so the fix
   held on a real show. The curl backup kept in the scratchpad meanwhile was deleted.
+- 10/13 Hardline: remove-ads failed with "The hosted runner lost communication with the
+  server" (job logs 404). `gh api -X POST .../runs/<id>/rerun-failed-jobs` re-ran just that
+  job from the saved hand-off copy; no change needed.
 
 ## Check-ins (Claude Code Routines)
 
@@ -165,6 +168,9 @@ unrelated.
   total heads for ~13 GB (30 days live + 30 in trash). If his quota is the free 15 GB, make the
   cleanup delete permanently in the next Apps Script change.
 - The Node 20 deprecation warning on actions/checkout@v4 is harmless for now.
+- Runners pinned to `ubuntu-24.04` (all three jobs) on 10/14: GitHub moves `ubuntu-latest` to
+  Ubuntu 26 from 10/19, which could change the apt ffmpeg and Python versions under the pinned
+  packages. Move to the new image on purpose later (check with a Test run and `reprocess.yml`).
 - Slow apt: "Install ffmpeg" took 13 min on 10/1 and hung 8+ min on two runners in a row on
   10/7 (a normal cancel didn't stop it; `gh api -X POST .../runs/<id>/force-cancel` did). Since
   10/7 the record job installs ffmpeg in the background and starts recording right after
