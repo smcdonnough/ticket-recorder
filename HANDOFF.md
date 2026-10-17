@@ -106,7 +106,8 @@ re-created in the ticket-recorder session on 9/26.
 - 9/30 Hardline: the AI listed 3:27:22–3:27:51 (~6:25 PM, 29 s) with the note "actually host
   content, keep", and it was cut: everything in the answer is cut. Only case in 13 shows. Add
   "list only what to remove; leave out anything you decide to keep" to `INSTRUCTIONS` with the
-  next ad-rule change that gets a reprocess run anyway, not as its own paid run.
+  next ad-rule change that gets a reprocess run anyway, not as its own paid run. Done 10/17
+  with the no-speech cut below.
 - 10/5 Hardline: GitHub runner outage (status page: from 19:11 UTC). Queued jobs got no runner
   and were cancelled after ~15 min (the 19:32 scheduled trigger and the 19:46 dispatch); the
   20:02 dispatch got a runner at 20:12 and recorded from 3:13 PM, so the episode (3:49 long, in
@@ -122,6 +123,15 @@ re-created in the ticket-recorder session on 9/26.
 - 10/13 Hardline: remove-ads failed with "The hosted runner lost communication with the
   server" (job logs 404). `gh api -X POST .../runs/<id>/rerun-failed-jobs` re-ran just that
   job from the saved hand-off copy; no change needed.
+- 10/17: Sean heard "elevator music between segments" in a Hardline. The station's internet
+  stream fills ad slots it has no ad for with stock music (~-19 dB, no speech): 65 s + 133 s on
+  10/9, 68 s + 110 s on 10/15, 132 s + 99 s on 10/16, none on the Musers in three weeks. Whisper
+  (VAD) transcribes nothing there, so the AI never saw it; the cut starts at the first spoken
+  ad, so music right after the host's "next" stayed (and once sat between two kept promos).
+  Fix: `process.py` also cuts any stretch of 30+ s with no transcribed speech
+  (`NO_SPEECH_CUT`), listed as `no_speech` in the cut list. Clips the hosts play on air (songs,
+  goal calls, music beds) ran 21 s at most over 10/1-10/16 (checked on all 24 episodes with
+  Silero VAD). Check: 10/16 Hardline re-run with `reprocess.yml` (run 39001980119), result pending.
 
 ## Check-ins (Claude Code Routines)
 
