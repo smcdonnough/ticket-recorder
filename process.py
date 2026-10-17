@@ -21,6 +21,11 @@ CLAUDE_MODEL = "claude-opus-5"
 PRICE_PER_MTOK = (5.00, 25.00)  # input, output (USD) for CLAUDE_MODEL; update if the model changes
 USAGE = {"in": 0, "out": 0}
 FFMPEG = os.environ.get("FFMPEG", "ffmpeg")
+# The station's internet stream fills ad slots it has no ad for with stock music, 1-2 min at a
+# time (Hardline 10/9, 10/15, 10/16). Whisper hears no speech in it, so Claude never sees it;
+# any stretch this long with no speech is cut as well. Clips the hosts play on air (songs,
+# goal calls, music beds) ran 21 s at most in three weeks of shows.
+NO_SPEECH_CUT = 30
 
 INSTRUCTIONS = """\
 This is a timestamped transcript of a recording of The Ticket (KTCK, Sportsradio 96.7 FM /
@@ -52,6 +57,8 @@ Keep, even right next to a break (these are show content, not ads):
   they are a few seconds and cutting them would chop the host's sentence
 
 Remove through to its very end: sports/news ticker updates and traffic reports.
+
+List only what to remove; leave out anything you decide to keep (everything listed is cut).
 """
 
 
@@ -169,14 +176,27 @@ def find_removals(segs, chunk=2500):
     return found
 
 
-def cut_ranges(segs, duration, removals):
-    """Seconds to drop: from the first removed line's start to the next kept line's start."""
-    ranges = []
-    for r in sorted(removals, key=lambda r: r.first_line):
+def no_speech(segs, duration, longest=NO_SPEECH_CUT):
+    """Stretches of at least `longest` seconds with no transcribed speech, less a little at
+    each end so the words either side aren't clipped."""
+    found, last = [], 0.0
+    for start, end, _ in segs + [(duration, duration, "")]:
+        if start - last >= longest:
+            found.append((last + 0.5, start - 0.3))
+        last = max(last, end)
+    return found
+
+
+def cut_ranges(segs, duration, removals, quiet=()):
+    """Seconds to drop: from the first removed line's start to the next kept line's start,
+    plus the stretches with no speech."""
+    spans = []
+    for r in removals:
         a = max(0, min(r.first_line, len(segs) - 1))
         b = max(a, min(r.last_line, len(segs) - 1))
-        start = segs[a][0]
-        end = segs[b + 1][0] if b + 1 < len(segs) else duration
+        spans.append((segs[a][0], segs[b + 1][0] if b + 1 < len(segs) else duration))
+    ranges = []
+    for start, end in sorted(spans + list(quiet)):
         if ranges and start - ranges[-1][1] < 3:  # swallow slivers between breaks
             ranges[-1][1] = max(ranges[-1][1], end)
         else:
@@ -246,7 +266,10 @@ def main():
         return
 
     removals = find_removals(segs)
-    ranges = cut_ranges(segs, duration, removals)
+    quiet = no_speech(segs, duration)
+    print(f"No speech for {NO_SPEECH_CUT}+ s: {len(quiet)} stretches,"
+          f" {hms(sum(b - a for a, b in quiet))}", flush=True)
+    ranges = cut_ranges(segs, duration, removals, quiet)
     clean = f"{base}.m4a"
     kept = render_without(src, clean, ranges, duration)
     removed = duration - kept
@@ -255,14 +278,16 @@ def main():
     cut_list = f"{base} cut list.txt"
     with open(cut_list, "w") as f:
         cost = (USAGE["in"] * PRICE_PER_MTOK[0] + USAGE["out"] * PRICE_PER_MTOK[1]) / 1e6
+        items = [(segs[min(r.first_line, len(segs) - 1)][0], segs[min(r.last_line, len(segs) - 1)][1],
+                  r.kind, r.note) for r in removals]
+        items += [(a, b, "no_speech", f"{b - a:.0f} s with no speech (stream filler music)")
+                  for a, b in quiet]
         f.write(f"{base}: removed {hms(removed)} of {hms(duration)} in {len(ranges)} breaks"
-                f" ({len(removals)} items below)\n")
+                f" ({len(items)} items below)\n")
         f.write(f"AI review cost: ~${cost:.2f} ({USAGE['in']} input / {USAGE['out']} output tokens)\n\n")
         print(f"AI review cost: ~${cost:.2f}", flush=True)
-        for r in sorted(removals, key=lambda r: r.first_line):
-            a = min(r.first_line, len(segs) - 1)
-            b = min(r.last_line, len(segs) - 1)
-            f.write(f"{hms(segs[a][0])}-{hms(segs[b][1])}{clock(segs[a][0])}  {r.kind:20s} {r.note}\n")
+        for a, b, kind, note in sorted(items):
+            f.write(f"{hms(a)}-{hms(b)}{clock(a)}  {kind:20s} {note}\n")
     upload(clean, "audio/mp4", sub=None)
     upload(cut_list, "text/plain")
     refresh_feed()
