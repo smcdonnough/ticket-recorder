@@ -131,7 +131,14 @@ re-created in the ticket-recorder session on 9/26.
   Fix: `process.py` also cuts any stretch of 30+ s with no transcribed speech
   (`NO_SPEECH_CUT`), listed as `no_speech` in the cut list. Clips the hosts play on air (songs,
   goal calls, music beds) ran 21 s at most over 10/1-10/16 (checked on all 24 episodes with
-  Silero VAD). Check: 10/16 Hardline re-run with `reprocess.yml` (run 39001980119), result pending.
+  Silero VAD). Checked 10/17 by re-running 10/16 Hardline with `reprocess.yml` (run
+  39001980119, $0.62): 18 no-speech stretches (24.6 min) in the full recording, every one inside
+  or touching a break the AI had marked (one was 250 s between two ads), so no show audio was
+  cut; the new episode has nothing over 10 s without speech, and both joins where the music had
+  been are clean. Same-name uploads make a second file, so the old 10/16 episode was trashed
+  (file 1Md1wlZt..., in Drive trash until ~11/16); the feed drops it at the next rebuild
+  (Monday's Musers). Check that it's gone then: if trashed files still show, `buildFeed_`
+  needs `if (f.isTrashed()) continue;`. Thursday 10/15 can't be redone (hand-off expired).
 
 ## Check-ins (Claude Code Routines)
 
