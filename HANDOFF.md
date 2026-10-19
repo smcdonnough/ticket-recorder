@@ -137,8 +137,10 @@ re-created in the ticket-recorder session on 9/26.
   cut; the new episode has nothing over 10 s without speech, and both joins where the music had
   been are clean. Same-name uploads make a second file, so the old 10/16 episode was trashed
   (file 1Md1wlZt..., in Drive trash until ~11/16); the feed drops it at the next rebuild
-  (Monday's Musers). Check that it's gone then: if trashed files still show, `buildFeed_`
-  needs `if (f.isTrashed()) continue;`. Thursday 10/15 can't be redone (hand-off expired).
+  (Monday's Musers). Thursday 10/15 can't be redone (hand-off expired). 10/19: the feed
+  rebuild dropped the trashed file (so `buildFeed_` already skips trash), and the first Musers
+  on the rule had 8 no-speech stretches (7.6 min), all inside or touching AI-marked breaks: the
+  filler now shows up on the Musers too.
 
 ## Check-ins (Claude Code Routines)
 
