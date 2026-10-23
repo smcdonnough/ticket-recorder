@@ -141,6 +141,15 @@ re-created in the ticket-recorder session on 9/26.
   rebuild dropped the trashed file (so `buildFeed_` already skips trash), and the first Musers
   on the rule had 8 no-speech stretches (7.6 min), all inside or touching AI-marked breaks: the
   filler now shows up on the Musers too.
+- 10/23 Musers: ad removal failed with `401 invalid x-api-key` (the 10/22 Hardline at 00:20 UTC
+  had worked; no key was ever in the repo history). The key was disabled or deleted on
+  Anthropic's side; only Sean can make a new one and paste it into the repo secret
+  `ANTHROPIC_API_KEY` (asked 10/23 ~9:55 AM CT). A 401 costs nothing. Meanwhile: hand-off
+  copies are now kept 4 days (was 1), and the new `hold.yml` saved the 10/23 Musers copy until
+  10/30 (hold run 39973522826; give that id to `reprocess.yml`, not the original 39937871200).
+  Once the key works: reprocess 10/23 Musers (and 10/23 Hardline if it failed too), check
+  the feed. The same job's "Install tools" took 39 min (apt again, 29 min on 10/8): give
+  remove-ads the background-install treatment, testing it with that reprocess run.
 
 ## Check-ins (Claude Code Routines)
 
