@@ -15,7 +15,8 @@ Apple Podcasts.
 - `process.py`: transcription (faster-whisper), ad review (Claude), cutting (ffmpeg), uploads,
   feed refresh. `INSTRUCTIONS` holds the ad rules.
 - `.github/workflows/record.yml`: the record → remove-ads pipeline. `reprocess.yml` reruns ad
-  removal on an earlier run's recording (the hand-off copy is kept one day).
+  removal on an earlier run's recording (the hand-off copy is kept four days; `hold.yml`
+  saves a fresh copy for longer, then give `reprocess.yml` the hold run's id).
 - `requirements.txt`: pinned Python packages for both remove-ads jobs (an unpinned `av`
   release broke transcription on 9/29). Bump on purpose, then check with `reprocess.yml`.
 - `drive-upload.gs`: the Google Apps Script web app (uploads, 30-day cleanup, podcast feed).

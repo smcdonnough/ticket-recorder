@@ -1,7 +1,7 @@
 name: Reprocess a recording
 
 # Re-runs transcription + ad removal on a recording from an earlier run of
-# "Record The Ticket" (its hand-off copy is kept for one day).
+# "Record The Ticket" (its hand-off copy is kept for four days; hold.yml keeps one longer).
 on:
   workflow_dispatch:
     inputs:
