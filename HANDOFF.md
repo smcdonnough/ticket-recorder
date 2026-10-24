@@ -148,6 +148,15 @@ re-created in the ticket-recorder session on 9/26.
   copies are now kept 4 days (was 1), and the new `hold.yml` saved the 10/23 Musers copy until
   10/30 (hold run 39973522826; give that id to `reprocess.yml`, not the original 39937871200).
   10/23 Hardline failed the same way (record run 40014076822, copy kept to 10/28 00:05 UTC).
+  10/24 ~4:30 AM CT Sean made a new key; both 10/23 shows reprocessed fine (runs 40062730302,
+  40062735286; Hardline $0.62).
+- 10/24: the 30-day cleanup in `drive-upload.gs` trashed `feed.xml` itself (created ~9/24),
+  so the next refresh made a NEW feed.xml (id 1sdrcWon..., in the subfolder) at a new address;
+  the old address still answers but is frozen at the 10/22 Hardline, and that's what Sean's
+  app follows. Fix: cleanup skips feed.xml (repo copy changed; Sean must make the same
+  one-line edit and deploy a new version), then Sean restores the old feed.xml from Drive
+  trash, then trash the new one and run `feed.yml` (new: rebuilds the feed on demand) and
+  check the old address lists 10/23. Asked Sean 10/24.
   Once the key works: reprocess 10/23 Musers and 10/23 Hardline, check
   the feed. The same job's "Install tools" took 39 min (apt again, 29 min on 10/8): give
   remove-ads the background-install treatment, testing it with that reprocess run.

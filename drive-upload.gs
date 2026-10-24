@@ -50,7 +50,9 @@ function cleanup_(folder) {
   const files = folder.getFiles();
   while (files.hasNext()) {
     const f = files.next();
-    if (f.getDateCreated().getTime() < cutoff) f.setTrashed(true);
+    // feed.xml lives on (same file id = same podcast address); trashing it at 30 days on
+    // 10/24 made a new feed at a new address and froze Sean's subscription.
+    if (f.getName() !== 'feed.xml' && f.getDateCreated().getTime() < cutoff) f.setTrashed(true);
   }
 }
 

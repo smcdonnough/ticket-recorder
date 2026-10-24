@@ -1,0 +1,28 @@
+name: Refresh podcast feed
+
+# Asks the Drive script to rebuild the podcast feed now (every show does this too).
+# Prints only whether it worked: the reply is the feed's address, which stays private.
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  feed:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - name: Rebuild the feed
+        env:
+          DRIVE_UPLOAD_URL: ${{ secrets.DRIVE_UPLOAD_URL }}
+        run: |
+          python3 - <<'PY'
+          import os, sys, urllib.parse, urllib.request
+          url = os.environ["DRIVE_UPLOAD_URL"]
+          url += ("&" if "?" in url else "?") + urllib.parse.urlencode({"action": "feed"})
+          reply = urllib.request.urlopen(url, timeout=180).read().decode().strip()
+          ok = reply.startswith("https://drive.usercontent.google.com/")
+          print("Feed rebuilt" if ok else "Feed rebuild failed: " + reply[:80])
+          sys.exit(0 if ok else 1)
+          PY
