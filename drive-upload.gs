@@ -25,7 +25,7 @@ function doGet(e) {
       contentType: 'application/json; charset=UTF-8',
       headers: {
         Authorization: 'Bearer ' + ScriptApp.getOAuthToken(),
-        'X-Upload-Content-Type': 'audio/mp4',
+        'X-Upload-Content-Type': e.parameter.type || 'audio/mp4',
         'X-Upload-Content-Length': String(e.parameter.size || ''),
       },
       payload: JSON.stringify({ name: e.parameter.name, parents: [folder.getId()] }),
@@ -86,10 +86,27 @@ function buildFeed_() {
     '<language>en-us</language><itunes:block>Yes</itunes:block>\n' + items + '\n</channel></rss>';
   const extras = subfolder_(main, 'Full recordings & transcripts');
   const it = extras.getFilesByName('feed.xml');
-  const feed = it.hasNext() ? it.next() : extras.createFile('feed.xml', xml, 'application/rss+xml');
+  const feed = it.hasNext() ? it.next()
+    : restoreFeed_(extras) || extras.createFile('feed.xml', xml, 'application/rss+xml');
   feed.setContent(xml);
   feed.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
   return 'https://drive.usercontent.google.com/download?id=' + feed.getId() + '&export=download&confirm=t';
+}
+
+// Brings the oldest feed.xml in this folder back from the trash (same file id = the same
+// address the podcast app follows), if there is one. The 30-day cleanup trashed it on 10/24.
+function restoreFeed_(extras) {
+  let oldest = null;
+  const files = DriveApp.getTrashedFiles();
+  while (files.hasNext()) {
+    const f = files.next();
+    if (f.getName() !== 'feed.xml') continue;
+    const parents = f.getParents();
+    if (!parents.hasNext() || parents.next().getId() !== extras.getId()) continue;
+    if (!oldest || f.getDateCreated() < oldest.getDateCreated()) oldest = f;
+  }
+  if (oldest) oldest.setTrashed(false);
+  return oldest;
 }
 
 // Weekday start times, Central. Google runs each within ~15 minutes of the time.

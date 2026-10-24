@@ -153,10 +153,12 @@ re-created in the ticket-recorder session on 9/26.
 - 10/24: the 30-day cleanup in `drive-upload.gs` trashed `feed.xml` itself (created ~9/24),
   so the next refresh made a NEW feed.xml (id 1sdrcWon..., in the subfolder) at a new address;
   the old address still answers but is frozen at the 10/22 Hardline, and that's what Sean's
-  app follows. Fix: cleanup skips feed.xml (repo copy changed; Sean must make the same
-  one-line edit and deploy a new version), then Sean restores the old feed.xml from Drive
-  trash, then trash the new one and run `feed.yml` (new: rebuilds the feed on demand) and
-  check the old address lists 10/23. Asked Sean 10/24.
+  app follows. Fix (repo copy updated; Sean pastes everything from `function doGet` down,
+  keeping his own KEY/GH_TOKEN lines, and deploys a new version): cleanup skips feed.xml, and
+  when no feed.xml is live the script restores the oldest trashed one (`restoreFeed_`). After
+  he deploys: trash the new feed.xml (1sdrcWon...), run `feed.yml` (new: rebuilds the feed on
+  demand) and check the old address lists 10/23. The script now also takes an optional
+  `type` for uploads (process.py doesn't send it yet). Asked Sean 10/24.
   Once the key works: reprocess 10/23 Musers and 10/23 Hardline, check
   the feed. The same job's "Install tools" took 39 min (apt again, 29 min on 10/8): give
   remove-ads the background-install treatment, testing it with that reprocess run.
