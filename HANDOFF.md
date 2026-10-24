@@ -147,7 +147,8 @@ re-created in the ticket-recorder session on 9/26.
   `ANTHROPIC_API_KEY` (asked 10/23 ~9:55 AM CT). A 401 costs nothing. Meanwhile: hand-off
   copies are now kept 4 days (was 1), and the new `hold.yml` saved the 10/23 Musers copy until
   10/30 (hold run 39973522826; give that id to `reprocess.yml`, not the original 39937871200).
-  Once the key works: reprocess 10/23 Musers (and 10/23 Hardline if it failed too), check
+  10/23 Hardline failed the same way (record run 40014076822, copy kept to 10/28 00:05 UTC).
+  Once the key works: reprocess 10/23 Musers and 10/23 Hardline, check
   the feed. The same job's "Install tools" took 39 min (apt again, 29 min on 10/8): give
   remove-ads the background-install treatment, testing it with that reprocess run.
 
