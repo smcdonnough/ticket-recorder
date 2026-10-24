@@ -159,6 +159,10 @@ re-created in the ticket-recorder session on 9/26.
   he deploys: trash the new feed.xml (1sdrcWon...), run `feed.yml` (new: rebuilds the feed on
   demand) and check the old address lists 10/23. The script now also takes an optional
   `type` for uploads (process.py doesn't send it yet). Asked Sean 10/24.
+  Done 10/24 3:23 PM CT: Sean pasted it and deployed (script "Untitled project" in My Drive);
+  the new feed.xml was trashed, `feed.yml` restored the original (created 9/23 16:41 UTC,
+  which is why the first upload after 10/23 16:41 trashed it), and the original address
+  lists the 10/23 shows again. It's the only live feed.xml.
   Once the key works: reprocess 10/23 Musers and 10/23 Hardline, check
   the feed. The same job's "Install tools" took 39 min (apt again, 29 min on 10/8): give
   remove-ads the background-install treatment, testing it with that reprocess run.
