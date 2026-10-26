@@ -211,6 +211,9 @@ unrelated.
   $0.58-0.68, plus the $0.62 10/16 redo for the filler music; the 10/13 Hardline's first,
   failed attempt has no log, so it may have cost up to ~$0.60 more). October on track for ~$25
   (22 weekdays at ~$1.09 plus the redo), ~$2 over the ~$23 budget.
+- Weekly report 10/26: week of 10/19 $5.64 by the job logs (Musers $0.47-0.50, Hardline
+  $0.61-0.68; the 10/23 shows were redone 10/24 at normal cost, the failed 401 tries cost
+  nothing). October on track for ~$25, ~$2 over budget.
 - Drive storage: ~2.5 GB live on 10/5 (~290 MB per weekday). The cleanup trashes files, and
   trash counts toward his quota until Drive empties it after 30 days, so from late October the
   total heads for ~13 GB (30 days live + 30 in trash). If his quota is the free 15 GB, make the
