@@ -214,6 +214,10 @@ unrelated.
 - Weekly report 10/26: week of 10/19 $5.64 by the job logs (Musers $0.47-0.50, Hardline
   $0.61-0.68; the 10/23 shows were redone 10/24 at normal cost, the failed 401 tries cost
   nothing). October on track for ~$25, ~$2 over budget.
+- Weekly report 11/2: week of 10/26 $5.70 (Musers $0.47-0.50, Hardline $0.63-0.71). October
+  came to ~$25 (~$2 over). November: 21 weekdays at ~$1.14 = ~$24. Drive: ~6.5 GB of live
+  shows plus the cleanup's trash (counts against quota for 30 days), heading for ~13 GB.
+  `gh api .../actions/jobs/<id>/logs` works again (11/2) for pulling cost lines.
 - Drive storage: ~2.5 GB live on 10/5 (~290 MB per weekday). The cleanup trashes files, and
   trash counts toward his quota until Drive empties it after 30 days, so from late October the
   total heads for ~13 GB (30 days live + 30 in trash). If his quota is the free 15 GB, make the
