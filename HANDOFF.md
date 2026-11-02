@@ -196,7 +196,9 @@ unrelated.
 ## Open items
 
 - 11/1 DST: the UTC check-in times become 4:15 AM / 1:45 PM CST. Recording still works: a
-  Hardline started at 1:45 PM runs ~5 h 20 m, under the 350-min job limit.
+  Hardline started at 1:45 PM runs ~5 h 20 m, under the 350-min job limit. Confirmed 11/2: the
+  Musers started 4:20 AM CST, cropped to 3:04:00, in the feed 9:13 AM; its post-show check
+  fired at 9:45 AM CST as planned (CRON_TZ).
 - The Anthropic credit is prepaid ($10 initially). Remind Sean about auto-reload or a top-up if
   runs start failing with auth/billing errors. Spend by the cut lists: 9/22–9/25 $3.70, week of
   9/28 $6.55 (incl. the failed ~$0.70; 10/2: Musers $0.45, Hardline $0.78), so ~$10.25 in all.
