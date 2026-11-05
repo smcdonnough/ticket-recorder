@@ -7,3 +7,5 @@ ctranslate2==4.8.2
 anthropic==1.9.0
 pydantic==2.13.5
 requests==2.34.2
+# Static ffmpeg for cutting (the jobs set $FFMPEG to it); replaces a slow apt install.
+imageio-ffmpeg==0.6.0
