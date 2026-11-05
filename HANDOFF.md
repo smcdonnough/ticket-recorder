@@ -17,7 +17,8 @@ re-created in the ticket-recorder session on 9/26.
    next job as a 1-day artifact encrypted with the `DRIVE_UPLOAD_URL` secret (the repo is public).
 3. **Remove ads** (`process.py`). faster-whisper base.en with word timestamps, each 30 s window
    transcribed fresh (`condition_on_previous_text=False`), lines split at sentence ends/pauses. Claude (`claude-opus-5`) reviews ~2,500-line slices and returns line
-   ranges to remove. ffmpeg drops them, re-encodes AAC 64k, and uploads
+   ranges to remove. ffmpeg (static 7.0.2 from the pinned `imageio-ffmpeg` pip package since
+   11/5, not apt) drops them, re-encodes AAC 64k, and uploads
    "<Show> <date> (<Day>).m4a" to the main folder plus the transcript and cut list (with
    approximate clock times and AI cost) to the subfolder. It then asks the Apps Script to
    rebuild the podcast feed.
@@ -164,8 +165,8 @@ re-created in the ticket-recorder session on 9/26.
   which is why the first upload after 10/23 16:41 trashed it), and the original address
   lists the 10/23 shows again. It's the only live feed.xml.
   Once the key works: reprocess 10/23 Musers and 10/23 Hardline, check
-  the feed. The same job's "Install tools" took 39 min (apt again, 29 min on 10/8): give
-  remove-ads the background-install treatment, testing it with that reprocess run.
+  the feed. The same job's "Install tools" took 39 min (apt again, 29 min on 10/8); fixed 11/5
+  by dropping apt from remove-ads (see "Slow apt" below).
 
 ## Check-ins (Claude Code Routines)
 
@@ -235,9 +236,14 @@ unrelated.
   checkout; record.sh waits for ffmpeg (or installs it) before cropping. Tested with a Test run
   the same day (remove-ads cancelled so no test episode reached the feed).
   10/8: the remove-ads job's own "Install tools" (same apt install) took 29 min, so the Musers
-  reached the feed at 9:42 AM instead of ~9:15. If that keeps happening, give remove-ads the
-  same treatment (process.py only needs the ffmpeg binary for the final cut) or switch both
-  jobs to a pinned pip-installed static ffmpeg; test with `reprocess.yml`.
+  reached the feed at 9:42 AM instead of ~9:15 (39 min on 10/23, 41 min on 11/5).
+  **Fixed 11/5 (3da8441):** remove-ads and reprocess.yml no longer use apt. `imageio-ffmpeg==0.6.0`
+  (static ffmpeg 7.0.2; 0.7/0.8 were days old) is in requirements.txt and the jobs export
+  `$FFMPEG`, which process.py already read. Test run 11/5: "Install tools" 13 s, the cut worked
+  (10:54 sample); its test episode, transcript and cut list were trashed and the feed rebuilt.
+  The 11/5 Musers itself ran on the old step, reached the feed at 9:57 AM CST. The record job
+  still apt-installs in the background (it has hours to spare); move it to the same package if
+  that ever bites.
 - Transcripts and cut lists land in Drive as `audio/mp4`: `drive-upload.gs` sends
   `X-Upload-Content-Type: audio/mp4` for every upload. Fold a fix (pass the type through) into
   the next Apps Script change rather than asking Sean to redeploy for this alone.
