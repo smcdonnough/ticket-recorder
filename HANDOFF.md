@@ -241,7 +241,8 @@ unrelated.
   (static ffmpeg 7.0.2; 0.7/0.8 were days old) is in requirements.txt and the jobs export
   `$FFMPEG`, which process.py already read. Test run 11/5: "Install tools" 13 s, the cut worked
   (10:54 sample); its test episode, transcript and cut list were trashed and the feed rebuilt.
-  The 11/5 Musers itself ran on the old step, reached the feed at 9:57 AM CST. The record job
+  The 11/5 Musers itself ran on the old step, reached the feed at 9:57 AM CST. First real show on
+  the new step: 11/5 Hardline, "Install tools" 16 s, removed 1:34:35 of 4:03:59, in the feed 7:22 PM. The record job
   still apt-installs in the background (it has hours to spare); move it to the same package if
   that ever bites.
 - Transcripts and cut lists land in Drive as `audio/mp4`: `drive-upload.gs` sends
