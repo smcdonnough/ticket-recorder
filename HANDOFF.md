@@ -221,6 +221,9 @@ unrelated.
   came to ~$25 (~$2 over). November: 21 weekdays at ~$1.14 = ~$24. Drive: ~6.5 GB of live
   shows plus the cleanup's trash (counts against quota for 30 days), heading for ~13 GB.
   `gh api .../actions/jobs/<id>/logs` works again (11/2) for pulling cost lines.
+- Weekly report 11/9: week of 11/2 $5.86 (Musers $0.48-0.60, Hardline $0.60-0.72, plus a
+  $0.03 test on 11/5). November: 21 weekdays at ~$1.17 = ~$24.50. Drive: 6.34 GB live (44
+  episodes 2.89 GB, 45 full recordings 3.45 GB; oldest 10/8), so not mentioned to Sean.
 - Drive storage: ~2.5 GB live on 10/5 (~290 MB per weekday). The cleanup trashes files, and
   trash counts toward his quota until Drive empties it after 30 days, so from late October the
   total heads for ~13 GB (30 days live + 30 in trash). If his quota is the free 15 GB, make the
