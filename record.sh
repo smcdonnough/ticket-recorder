@@ -89,17 +89,24 @@ if [[ -z "${DRIVE_UPLOAD_URL:-}" ]]; then
   echo "DRIVE_UPLOAD_URL not set; leaving file at $OUT"; exit 0
 fi
 
-# Ask the Apps Script for a one-time Drive upload link, then send the file to it.
+# Ask the Apps Script for a one-time Drive upload link, then send the file to it; each try
+# gets a fresh link. A failed upload costs only this Drive copy (the file is already handed to
+# the ad-removal job above), so it warns instead of failing. 11/11: Drive answered 502 to every
+# PUT, the old exit failed this step, the hand-off was skipped and that Hardline was lost.
+# Worst case ~17 min, which a Hardline run (~5 h 22 m) still fits under the 350-min limit.
 NAME="$(basename "$OUT")"
-# Apps Script answers with a redirect that only resolves with its cookie kept.
-SESSION=""
-for attempt in 1 2 3 4 5; do
-  SESSION=$(curl -sS --connect-timeout 30 -m 60 -L -c "$WORK/jar" -b "$WORK/jar" -G "$DRIVE_UPLOAD_URL" \
+upload_once() {
+  local session
+  # Apps Script answers with a redirect that only resolves with its cookie kept.
+  session=$(curl -sS --connect-timeout 30 -m 60 -L -c "$WORK/jar" -b "$WORK/jar" -G "$DRIVE_UPLOAD_URL" \
     --data-urlencode "name=$NAME" --data-urlencode "size=$SIZE" \
     --data-urlencode "sub=$EXTRAS" || true)
-  case "$SESSION" in https://*) break;; esac
-  sleep 20
+  case "$session" in https://*) ;; *) echo "Upload link request failed: ${session:0:200}"; return 1;; esac
+  curl -sS --fail --connect-timeout 30 -m 240 -X PUT -H "Content-Type: audio/mp4" \
+    --upload-file "$OUT" "$session" -o /dev/null
+}
+for attempt in 1 2 3; do
+  if upload_once; then echo "Uploaded $NAME to Google Drive"; exit 0; fi
+  (( attempt < 3 )) && sleep $(( attempt * 30 ))
 done
-case "$SESSION" in https://*) ;; *) echo "Upload link request failed: $SESSION"; exit 1;; esac
-curl -sS --fail --retry 3 -X PUT -H "Content-Type: audio/mp4" --upload-file "$OUT" "$SESSION" -o /dev/null
-echo "Uploaded $NAME to Google Drive"
+echo "::warning::Could not upload $NAME to Google Drive after 3 tries; ad removal goes ahead with the hand-off copy."
