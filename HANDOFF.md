@@ -196,6 +196,13 @@ unrelated.
 
 ## Open items
 
+- **11/11 Hardline lost.** Recorded fine (84 MB cropped), but every PUT of the full recording
+  to Drive got a 502 (4 tries, ~2 min). record.sh exited 22; the encrypt/hand-off steps and
+  remove-ads were gated on the step succeeding, so all were skipped and the audio went with the
+  runner. Nothing for 11/11 in Drive. Fixed 11/12 (de78d33): the full-recording upload retries 3x
+  with a fresh link and only warns on failure; the hand-off steps and remove-ads run on
+  `!cancelled()` when `recorded == 'true'`. Upload logic tested locally with a stubbed 502
+  (warns, exit 0) and a Test run on the happy path. Told Sean.
 - 11/1 DST: the UTC check-in times become 4:15 AM / 1:45 PM CST. Recording still works: a
   Hardline started at 1:45 PM runs ~5 h 20 m, under the 350-min job limit. Confirmed 11/2: the
   Musers started 4:20 AM CST, cropped to 3:04:00, in the feed 9:13 AM; its post-show check
