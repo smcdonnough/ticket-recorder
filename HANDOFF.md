@@ -200,7 +200,9 @@ unrelated.
   session at 15:46 (5.5 h late; platform delivery, nothing in the repo), and none of GitHub's
   Musers cron backups fired by then either. Not recoverable. Added `wait.yml` (d71a75d): sleeps
   until a UTC time up to 5.5 h ahead, then dispatches record.yml. Used it as a backup for the
-  11/13 Hardline (run 43456262803, starts 19:40 UTC, 5 min before the check-in). Asked Sean
+  11/13 Hardline (run 43456262803, starts 19:40 UTC, 5 min before the check-in). Verified: it
+  dispatched record.yml at 19:40:02 (run 43494344871, actor github-actions[bot]), recording
+  from 19:40:11; the 19:45 check-in saw it running and did not start another. Asked Sean
   whether to make it permanent: each record run would book the next show through chained
   wait.yml runs (overnight and weekend gaps need several 5.5 h hops), with the check-ins kept
   as the backup. His 9/23 note: offer the Google-started schedule again if manual starts fail;
