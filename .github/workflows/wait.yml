@@ -1,0 +1,39 @@
+name: Start a show later
+
+# A starter that depends on neither GitHub's cron (often hours late, or never) nor Claude's
+# check-ins (11/13: the Musers start check reached the session 5.5 h late and the show was
+# missed). Sleeps until `at`, then starts record.yml for `show`. Starting a show that is already
+# recording is harmless: record.yml's concurrency group queues the extra run, and it exits once
+# the show is over.
+on:
+  workflow_dispatch:
+    inputs:
+      show:
+        type: choice
+        options: [Musers, Hardline]
+        required: true
+      at:
+        description: Start time in UTC, e.g. 2026-11-13T19:40:00Z (at most 5.5 hours ahead)
+        required: true
+
+permissions:
+  contents: read
+  actions: write
+
+jobs:
+  wait:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 345
+    steps:
+      - name: Wait, then start the show
+        env:
+          GH_TOKEN: ${{ github.token }}
+          SHOW: ${{ inputs.show }}
+          AT: ${{ inputs.at }}
+        run: |
+          target=$(date -u -d "$AT" +%s)
+          left=$(( target - $(date +%s) ))
+          if (( left > 330 * 60 )); then echo "::error::$AT is more than 5.5 hours away."; exit 1; fi
+          if (( left > 0 )); then echo "Waiting $(( left / 60 )) min to start $SHOW at $AT"; sleep "$left"; fi
+          gh workflow run record.yml -R "$GITHUB_REPOSITORY" --ref main -f show="$SHOW"
+          echo "Started $SHOW at $(date -u +%FT%TZ)"
