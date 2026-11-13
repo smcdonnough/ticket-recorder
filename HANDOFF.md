@@ -196,6 +196,15 @@ unrelated.
 
 ## Open items
 
+- **11/13 Musers missed.** The 10:15 UTC start check was queued on time but reached this
+  session at 15:46 (5.5 h late; platform delivery, nothing in the repo), and none of GitHub's
+  Musers cron backups fired by then either. Not recoverable. Added `wait.yml` (d71a75d): sleeps
+  until a UTC time up to 5.5 h ahead, then dispatches record.yml. Used it as a backup for the
+  11/13 Hardline (run 43456262803, starts 19:40 UTC, 5 min before the check-in). Asked Sean
+  whether to make it permanent: each record run would book the next show through chained
+  wait.yml runs (overnight and weekend gaps need several 5.5 h hops), with the check-ins kept
+  as the backup. His 9/23 note: offer the Google-started schedule again if manual starts fail;
+  this needs no token from him, so offered this instead.
 - **11/11 Hardline lost.** Recorded fine (84 MB cropped), but every PUT of the full recording
   to Drive got a 502 (4 tries, ~2 min). record.sh exited 22; the encrypt/hand-off steps and
   remove-ads were gated on the step succeeding, so all were skipped and the audio went with the
