@@ -1,20 +1,39 @@
-name: Start a show later
+name: Start shows on time
 
-# A starter that depends on neither GitHub's cron (often hours late, or never) nor Claude's
+# Starts every show itself, without GitHub's cron (often hours late, or never) or Claude's
 # check-ins (11/13: the Musers start check reached the session 5.5 h late and the show was
-# missed). Sleeps until `at`, then starts record.yml for `show`. Starting a show that is already
-# recording is harmless: record.yml's concurrency group queues the extra run, and it exits once
-# the show is over.
+# missed). The check-ins stay as the backup.
+#
+# Chain mode (no inputs): work out the next weekday show (Musers 4:10 AM, Hardline 1:40 PM
+# Central), sleep until then (a job can sleep at most 5.5 h, so longer waits hop through
+# several runs), start record.yml, then start the next link. `after` (set by the chain itself)
+# is the start time just handled, so a show is never started twice by the chain; with no
+# `after`, a show still on the air counts, so re-seeding mid-show starts it at once. A second
+# copy of the show being started is harmless: record.yml's concurrency group queues it and
+# it exits once the show is over. Only one chain runs: a new link cancels the old one.
+#
+# One-off mode: `show` and `at` (UTC, at most 5.5 h ahead) start one show once.
+# `dry`: print the plan and stop.
 on:
   workflow_dispatch:
     inputs:
       show:
-        type: choice
-        options: [Musers, Hardline]
-        required: true
+        description: One-off only (Musers or Hardline); leave empty for the chain
+        default: ''
       at:
-        description: Start time in UTC, e.g. 2026-11-13T19:40:00Z (at most 5.5 hours ahead)
-        required: true
+        description: One-off only, start time in UTC, e.g. 2026-11-13T19:40:00Z
+        default: ''
+      after:
+        description: Set by the chain; leave empty
+        default: ''
+      dry:
+        description: Print the plan only
+        type: boolean
+        default: false
+
+concurrency:
+  group: starter-${{ inputs.show != '' && 'oneoff' || 'chain' }}
+  cancel-in-progress: true
 
 permissions:
   contents: read
@@ -30,10 +49,42 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           SHOW: ${{ inputs.show }}
           AT: ${{ inputs.at }}
+          AFTER: ${{ inputs.after }}
+          DRY: ${{ inputs.dry }}
         run: |
-          target=$(date -u -d "$AT" +%s)
-          left=$(( target - $(date +%s) ))
-          if (( left > 330 * 60 )); then echo "::error::$AT is more than 5.5 hours away."; exit 1; fi
-          if (( left > 0 )); then echo "Waiting $(( left / 60 )) min to start $SHOW at $AT"; sleep "$left"; fi
+          export TZ=America/Chicago
+          now=${NOW:-$(date +%s)}  # NOW: for testing the plan
+          chain=1
+          if [[ -n "$SHOW" ]]; then
+            case "$SHOW" in Musers|Hardline) ;; *) echo "::error::show must be Musers or Hardline"; exit 1;; esac
+            chain=0; target=$(date -d "$AT" +%s)
+          else
+            # Weekday slots: show, start, end (Central).
+            SHOW=""; base=$(date -d "@$now" +%F)
+            for d in $(seq 0 8); do
+              day=$(date -d "$base +$d day" +%F)
+              (( $(date -d "$day" +%u) > 5 )) && continue
+              for slot in "Musers 04:10 09:00" "Hardline 13:40 19:00"; do
+                read -r name start end <<< "$slot"
+                s=$(date -d "$day $start" +%s); e=$(date -d "$day $end" +%s)
+                if [[ -n "$AFTER" ]]; then (( s > AFTER )) || continue
+                else (( e > now + 300 )) || continue; fi
+                SHOW=$name; target=$s; break 2
+              done
+            done
+            [[ -n "$SHOW" ]] || { echo "::error::no show found in the next 8 days"; exit 1; }
+          fi
+          left=$(( target - now ))
+          hop=$(( 330 * 60 ))
+          echo "Next: $SHOW at $(date -d @"$target" '+%a %F %H:%M %Z') (in $(( left / 60 )) min)"
+          if [[ "$DRY" == "true" ]]; then exit 0; fi
+          if (( left > hop )); then
+            (( chain )) || { echo "::error::$AT is more than 5.5 hours away."; exit 1; }
+            sleep "$hop"
+            gh workflow run wait.yml -R "$GITHUB_REPOSITORY" --ref main ${AFTER:+-f after="$AFTER"}
+            echo "Handed the wait to a new run"; exit 0
+          fi
+          if (( left > 0 )); then sleep "$left"; fi
           gh workflow run record.yml -R "$GITHUB_REPOSITORY" --ref main -f show="$SHOW"
-          echo "Started $SHOW at $(date -u +%FT%TZ)"
+          echo "Started $SHOW at $(date '+%H:%M %Z')"
+          if (( chain )); then gh workflow run wait.yml -R "$GITHUB_REPOSITORY" --ref main -f after="$target"; fi

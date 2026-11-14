@@ -36,7 +36,7 @@ permissions:
 jobs:
   record:
     runs-on: ubuntu-24.04
-    timeout-minutes: 350
+    timeout-minutes: 355
     outputs:
       recorded: ${{ steps.rec.outputs.recorded }}
       show: ${{ steps.rec.outputs.show }}
