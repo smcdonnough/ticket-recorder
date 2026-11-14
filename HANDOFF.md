@@ -7,9 +7,14 @@ re-created in the ticket-recorder session on 9/26.
 ## What runs, end to end
 
 1. **Start.** A run of `record.yml` with `show: Musers` or `show: Hardline`. **GitHub's own cron
-   is unreliable for this repo** (9/23: the 5 AM trigger never fired, others fired ~4 h late), so
-   a Claude check-in starts each show by hand (see Check-ins). The cron entries stay as a backup;
-   the per-show concurrency group de-dupes and late triggers exit cleanly once the show is over.
+   is unreliable for this repo** (9/23: the 5 AM trigger never fired, others fired ~4 h late).
+   Since 11/13 (Sean: "whatever you think best") the `wait.yml` chain starts every weekday show
+   itself, Musers 4:10 AM and Hardline 1:40 PM Central, hopping in 5.5 h sleeps between shows;
+   one chain at a time. The Claude check-ins (see Check-ins) are the backup: they start a
+   missing show and re-seed the chain (`wait.yml` with no inputs) if no link is running. The
+   cron entries stay as a last backup; the per-show concurrency group de-dupes and late
+   triggers exit cleanly once the show is over. A runner that hears nothing from the stream for
+   10 min hands the show to a fresh run (`attempt` input).
 2. **Record** (`record.sh`). KTCK AAC stream (StreamTheWorld, HE-AACv2 48 kbps, ~22 MB/h). It
    reconnects on drops and records until 9:05 AM / 7:05 PM Central, then crops to air time ±2 min
    (Musers 6:00–9:00, Hardline 3:00–7:00; the 5:30 pregame is cropped by design). It uploads
@@ -215,6 +220,10 @@ unrelated.
   wait.yml runs (overnight and weekend gaps need several 5.5 h hops), with the check-ins kept
   as the backup. His 9/23 note: offer the Google-started schedule again if manual starts fail;
   this needs no token from him, so offered this instead.
+  **Done 11/14:** Sean said "whatever you think best". Chain seeded (run 43561226366; dry run
+  43561194957 planned Mon 11/16 Musers 04:10 CST). Both start-check prompts updated to also
+  re-seed the chain. First chain-started show: Mon 11/16 Musers, verify at its 10:15 check-in
+  (record.yml run by github-actions[bot] at ~10:10 UTC).
 - **11/11 Hardline lost.** Recorded fine (84 MB cropped), but every PUT of the full recording
   to Drive got a 502 (4 tries, ~2 min). record.sh exited 22; the encrypt/hand-off steps and
   remove-ads were gated on the step succeeding, so all were skipped and the audio went with the
