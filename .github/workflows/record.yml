@@ -21,6 +21,9 @@ on:
         type: choice
         options: [Test, Musers, Hardline]
         default: Test
+      attempt:
+        description: Leave at 1 (raised when a silent runner hands the show to a fresh one)
+        default: '1'
 
 concurrency:
   group: record-${{ github.event.schedule && (startsWith(github.event.schedule, '47 9') || contains(github.event.schedule, ' 10 ') || contains(github.event.schedule, ' 11 ')) && 'Musers' || github.event.schedule && 'Hardline' || inputs.show }}
@@ -51,6 +54,7 @@ jobs:
           DRIVE_UPLOAD_URL: ${{ secrets.DRIVE_UPLOAD_URL }}
           SCHEDULE: ${{ github.event.schedule }}
           SHOW_INPUT: ${{ inputs.show }}
+          ATTEMPT: ${{ inputs.attempt || '1' }}
           OUT_DIR: ${{ runner.temp }}/out
         run: |
           # Which show this trigger is for; the UTC offset check in record.sh
@@ -70,6 +74,14 @@ jobs:
             Hardline) AIR_START=15:00 AIR_END=19:00 bash record.sh Hardline "$2" 19:05 ;;
             *)        MAX_SECONDS=600 bash record.sh Test ANY 00:00 ;;
           esac
+      # record.sh gave up on this runner after 10 silent minutes (see SILENT_LIMIT there).
+      - name: Restart on a fresh runner
+        if: ${{ failure() && steps.rec.outputs.restart == 'true' }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+          SHOW: ${{ steps.rec.outputs.restart_show }}
+          ATTEMPT: ${{ inputs.attempt || '1' }}
+        run: gh workflow run record.yml -R "$GITHUB_REPOSITORY" --ref main -f show="$SHOW" -f attempt=$(( ATTEMPT + 1 ))
       # The repo is public, so the hand-off copy is encrypted. Kept 4 days so a failed ad
       # removal on a Friday can still be redone with reprocess.yml on Monday (10/23: the
       # Anthropic key stopped working and the fix needed Sean).

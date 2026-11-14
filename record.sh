@@ -11,7 +11,11 @@ set -euo pipefail
 
 SHOW="$1"; OFFSET="$2"; END_CT="$3"
 EXTRAS="Full recordings & transcripts"  # Drive subfolder; the main folder holds only the no-ads shows
-STREAM="https://playerservices.streamtheworld.com/api/livestream-redirect/KTCKAMAAC.aac"
+STREAM="${STREAM:-https://playerservices.streamtheworld.com/api/livestream-redirect/KTCKAMAAC.aac}"
+# No audio at all this long after starting: give up on this runner so record.yml can start the
+# show again on a fresh one (11/13: one runner got nothing for the whole Hardline while the
+# stream was fine elsewhere). ATTEMPT counts those restarts; the fourth runner keeps trying.
+SILENT_LIMIT="${SILENT_LIMIT:-600}"; ATTEMPT="${ATTEMPT:-1}"
 FFMPEG="${FFMPEG:-ffmpeg}"
 export TZ=America/Chicago
 
@@ -33,15 +37,22 @@ echo "Recording $SHOW until $(date -d @"$END_EPOCH" +%H:%M) CT"
 # Reconnect whenever the stream drops, until the end time.
 REC_START="$(date +%s)"
 n=0
+GOT=0
 while (( $(date +%s) < END_EPOCH - 5 )); do
   remaining=$(( END_EPOCH - $(date +%s) ))
-  part="$WORK/part$(printf %03d $n).aac"
+  part="$WORK/part$(printf %05d $n).aac"
   # curl's own error is kept (sampled) so a dead stream says why (11/13: 4,529 empty segments
   # in a row, the whole Hardline, with no reason logged).
   err=$(timeout $(( remaining + 30 )) \
     curl -sS -L --max-time "$remaining" "$STREAM" -o "$part" 2>&1) || true
   size=$(stat -c %s "$part" 2>/dev/null || echo 0)
   if (( size > 0 || n < 5 || n % 100 == 0 )); then echo "segment $n: $size bytes${err:+ ($err)}"; fi
+  GOT=$(( GOT + size ))
+  if (( GOT == 0 && $(date +%s) - REC_START >= SILENT_LIMIT && ATTEMPT < 4 )) && [[ -n "${GITHUB_OUTPUT:-}" ]]; then
+    echo "::warning::No audio for $(( SILENT_LIMIT / 60 )) min on this runner; restarting $SHOW on a fresh one."
+    { echo "restart=true"; echo "restart_show=$SHOW"; } >> "$GITHUB_OUTPUT"
+    exit 1
+  fi
   n=$((n + 1))
   (( $(date +%s) < END_EPOCH - 5 )) && sleep 3
 done
