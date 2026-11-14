@@ -209,6 +209,12 @@ unrelated.
   `restart=true` and record.yml's "Restart on a fresh runner" dispatches the show again with
   `attempt` +1 (up to 3 restarts). Silent and normal paths tested locally (stubbed stream);
   Test run with `attempt=2` on Actions. Told Sean.
+  Cause still unknown (no curl error text was kept). What the log shows: the first attempt at
+  19:40:13 already failed, and every one of the 4,529 failed the same way, ~1.3 s each (4.28 s
+  median cycle incl. the 3 s sleep, no slow timeouts), for 5.5 h. No GitHub Actions/network or
+  Triton (StreamTheWorld) incident listed for that window (githubstatus.com history,
+  status.tritondigital.com "Nov 13: No incidents"). Best guess: the stream servers refused that
+  runner's address. Next time the log carries curl's error.
 - **11/13 Musers missed.** The 10:15 UTC start check was queued on time but reached this
   session at 15:46 (5.5 h late; platform delivery, nothing in the repo), and none of GitHub's
   Musers cron backups fired by then either. Not recoverable. Added `wait.yml` (d71a75d): sleeps
