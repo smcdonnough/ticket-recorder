@@ -36,9 +36,12 @@ n=0
 while (( $(date +%s) < END_EPOCH - 5 )); do
   remaining=$(( END_EPOCH - $(date +%s) ))
   part="$WORK/part$(printf %03d $n).aac"
-  timeout $(( remaining + 30 )) \
-    curl -s -L --max-time "$remaining" "$STREAM" -o "$part" || true
-  echo "segment $n: $(stat -c %s "$part" 2>/dev/null || echo 0) bytes"
+  # curl's own error is kept (sampled) so a dead stream says why (11/13: 4,529 empty segments
+  # in a row, the whole Hardline, with no reason logged).
+  err=$(timeout $(( remaining + 30 )) \
+    curl -sS -L --max-time "$remaining" "$STREAM" -o "$part" 2>&1) || true
+  size=$(stat -c %s "$part" 2>/dev/null || echo 0)
+  if (( size > 0 || n < 5 || n % 100 == 0 )); then echo "segment $n: $size bytes${err:+ ($err)}"; fi
   n=$((n + 1))
   (( $(date +%s) < END_EPOCH - 5 )) && sleep 3
 done
