@@ -196,6 +196,14 @@ unrelated.
 
 ## Open items
 
+- **11/13 Hardline lost too.** wait.yml started it fine at 19:40 UTC, but the runner got
+  4,529 empty segments in a row (curl -s hid why) until 19:05 CT: "Nothing recorded". Minutes
+  later the stream worked from this container and from a GitHub runner (Test run 43542730079,
+  4 MB in 10 min), so it was that runner or a passing outage. Fixes (33fdbd4, d2f6b71): curl
+  errors are logged (sampled); after 10 min with no audio at all, record.sh sets
+  `restart=true` and record.yml's "Restart on a fresh runner" dispatches the show again with
+  `attempt` +1 (up to 3 restarts). Silent and normal paths tested locally (stubbed stream);
+  Test run with `attempt=2` on Actions. Told Sean.
 - **11/13 Musers missed.** The 10:15 UTC start check was queued on time but reached this
   session at 15:46 (5.5 h late; platform delivery, nothing in the repo), and none of GitHub's
   Musers cron backups fired by then either. Not recoverable. Added `wait.yml` (d71a75d): sleeps
