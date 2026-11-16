@@ -230,6 +230,9 @@ unrelated.
   43561194957 planned Mon 11/16 Musers 04:10 CST). Both start-check prompts updated to also
   re-seed the chain. First chain-started show: Mon 11/16 Musers, verify at its 10:15 check-in
   (record.yml run by github-actions[bot] at ~10:10 UTC).
+  Verified 11/16: the chain hopped all weekend (links every 5.5 h; most show "cancelled",
+  which is the next link replacing it), started the Musers at 04:10:02 CST (run 43846362372,
+  recording from 10:10:09 UTC) and booked the next link (43846369393, for the Hardline).
 - **11/11 Hardline lost.** Recorded fine (84 MB cropped), but every PUT of the full recording
   to Drive got a 502 (4 tries, ~2 min). record.sh exited 22; the encrypt/hand-off steps and
   remove-ads were gated on the step succeeding, so all were skipped and the audio went with the
