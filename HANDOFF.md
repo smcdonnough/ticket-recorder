@@ -203,9 +203,14 @@ unrelated.
 
 - **11/23 Musers: `401 invalid x-api-key` again** (remove-ads in record run 45153571259; the
   recording finished and its hand-off copy is kept to 11/27 ~15:05 UTC). Exactly 30 days after
-  Sean made the 10/24 key, and 10/23 was ~30 days after the first key (9/23): likely the keys
-  expire after 30 days (inferred, not confirmed). Asked Sean 11/23 for a new key, with no
-  expiry if the Console offers that. The 11/23 Hardline will fail the same way until then.
+  Sean made the 10/24 key, and 10/23 was ~30 days after the first key (9/23). Anthropic's
+  authentication docs (checked 11/23): the Console asks for an expiration when a key is made
+  (3 h, 1 d, 7 d, 30 d, custom, or Never; it can't be changed later), an expired key returns
+  401, and Anthropic emails the creator 7 days before a key of 14+ days expires. So both keys
+  were most likely made with the 30-day choice (the matching dates fit; the key list itself
+  isn't visible from here). Asked Sean 11/23 for a new key with expiration **Never**. If his
+  Console doesn't offer Never, set a reminder a week before the new key's end date. The
+  11/23 Hardline's ad removal fails the same way unless the key is in before it ends.
   Once the key is in: `reprocess.yml` with run_id 45153571259 (Musers 2026-11-23) and the
   11/23 Hardline run, then check the feed.
 - **11/13 Hardline lost too.** wait.yml started it fine at 19:40 UTC, but the runner got
