@@ -206,9 +206,10 @@ unrelated.
   Sean made the 10/24 key, and 10/23 was ~30 days after the first key (9/23). Anthropic's
   authentication docs (checked 11/23): the Console asks for an expiration when a key is made
   (3 h, 1 d, 7 d, 30 d, custom, or Never; it can't be changed later), an expired key returns
-  401, and Anthropic emails the creator 7 days before a key of 14+ days expires. So both keys
-  were most likely made with the 30-day choice (the matching dates fit; the key list itself
-  isn't visible from here). Asked Sean 11/23 for a new key with expiration **Never**. If his
+  401, and Anthropic emails the creator 7 days before a key of 14+ days expires. Confirmed from
+  Sean's screenshot of his key list: "Ticket Key" made 9/22, expired 10/22; "Ticket Recorder"
+  (personal key, Default workspace) made 10/23, expired 11/22. The new key must also be scoped
+  to the Default workspace, or every request needs an anthropic-workspace-id header. Asked Sean 11/23 for a new key with expiration **Never**. If his
   Console doesn't offer Never, set a reminder a week before the new key's end date. The
   11/23 Hardline's ad removal fails the same way unless the key is in before it ends.
   Once the key is in: `reprocess.yml` with run_id 45153571259 (Musers 2026-11-23) and the
