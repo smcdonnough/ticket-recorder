@@ -201,19 +201,14 @@ unrelated.
 
 ## Open items
 
-- **11/23 Musers: `401 invalid x-api-key` again** (remove-ads in record run 45153571259; the
-  recording finished and its hand-off copy is kept to 11/27 ~15:05 UTC). Exactly 30 days after
-  Sean made the 10/24 key, and 10/23 was ~30 days after the first key (9/23). Anthropic's
-  authentication docs (checked 11/23): the Console asks for an expiration when a key is made
-  (3 h, 1 d, 7 d, 30 d, custom, or Never; it can't be changed later), an expired key returns
-  401, and Anthropic emails the creator 7 days before a key of 14+ days expires. Confirmed from
-  Sean's screenshot of his key list: "Ticket Key" made 9/22, expired 10/22; "Ticket Recorder"
-  (personal key, Default workspace) made 10/23, expired 11/22. The new key must also be scoped
-  to the Default workspace, or every request needs an anthropic-workspace-id header. Asked Sean 11/23 for a new key with expiration **Never**. If his
-  Console doesn't offer Never, set a reminder a week before the new key's end date. The
-  11/23 Hardline's ad removal fails the same way unless the key is in before it ends.
-  Once the key is in: `reprocess.yml` with run_id 45153571259 (Musers 2026-11-23) and the
-  11/23 Hardline run, then check the feed.
+- **Done 11/23: API key renewed.** 11/23 Musers failed with `401 invalid x-api-key`: Console
+  keys expire on the term picked at creation (3 h, 1 d, 7 d, 30 d, custom, or Never; fixed for
+  the key's life; Anthropic emails 7 days ahead for 14+ day keys). Sean's key list showed both
+  old keys were 30-day keys ("Ticket Key" 9/22-10/22, "Ticket Recorder" 10/23-11/22). Sean made
+  a new key at ~11:55 AM CT, asked for Never and the Default workspace (a key with no
+  workspace needs an anthropic-workspace-id header on every request). Reprocess run
+  45232757357 worked: 8 + 15 removals, 1:03:45 cut of 3:04:00, $0.48, in the feed 18:03 UTC.
+  If a 401 ever comes back, check the key list's Expires column first.
 - **11/13 Hardline lost too.** wait.yml started it fine at 19:40 UTC, but the runner got
   4,529 empty segments in a row (curl -s hid why) until 19:05 CT: "Nothing recorded". Minutes
   later the stream worked from this container and from a GitHub runner (Test run 43542730079,
