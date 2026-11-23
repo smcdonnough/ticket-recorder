@@ -201,6 +201,13 @@ unrelated.
 
 ## Open items
 
+- **11/23 Musers: `401 invalid x-api-key` again** (remove-ads in record run 45153571259; the
+  recording finished and its hand-off copy is kept to 11/27 ~15:05 UTC). Exactly 30 days after
+  Sean made the 10/24 key, and 10/23 was ~30 days after the first key (9/23): likely the keys
+  expire after 30 days (inferred, not confirmed). Asked Sean 11/23 for a new key, with no
+  expiry if the Console offers that. The 11/23 Hardline will fail the same way until then.
+  Once the key is in: `reprocess.yml` with run_id 45153571259 (Musers 2026-11-23) and the
+  11/23 Hardline run, then check the feed.
 - **11/13 Hardline lost too.** wait.yml started it fine at 19:40 UTC, but the runner got
   4,529 empty segments in a row (curl -s hid why) until 19:05 CT: "Nothing recorded". Minutes
   later the stream worked from this container and from a GitHub runner (Test run 43542730079,
