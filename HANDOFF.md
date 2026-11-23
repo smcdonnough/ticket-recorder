@@ -272,6 +272,10 @@ unrelated.
   Hardline lost and cost nothing; $0.11 of tests). 11/11 Musers was $0.96: the first slice
   used 19,740 output tokens (thinking) vs the usual ~1-2k; one-off. November ~$23 (11 weekdays
   left at ~$1.17). Drive 5.87 GB live (41 episodes 2.68 GB, 41 full 3.19 GB; oldest 10/15).
+- Weekly report 11/23: week of 11/16 $6.34, all 10 shows (all chain-started). 11/19 Hardline
+  was $1.27: first slice 25,436 output tokens (thinking), same pattern as 11/11 Musers. Twice
+  in two weeks; if it keeps happening, cap the thinking on the review. November ~$24 (6
+  weekdays left). Drive 5.87 GB live (82 files; oldest 10/22).
 - Drive storage: ~2.5 GB live on 10/5 (~290 MB per weekday). The cleanup trashes files, and
   trash counts toward his quota until Drive empties it after 30 days, so from late October the
   total heads for ~13 GB (30 days live + 30 in trash). If his quota is the free 15 GB, make the
